@@ -292,7 +292,7 @@ void* __aclib_clone_arr(void* ptr, size_t size);
 // FUNCTIONS AND MACROS:
 //  - al_slice_from(arr, size)
 //  - al_slice_free(slice)
-//      - al_slice_clone(slice)
+//      - todo: al_slice_clone(slice)
 //
 // USAGE:
 //  # DEFINING
@@ -387,7 +387,7 @@ void* __aclib_clone_arr(void* ptr, size_t size);
 //  - al_str_split_by_once(str, delim)
 //  - al_str_split_by_many(str, *delims)
 //  - al_str_split_at(str, idx)
-//  - al_str_read_file*buffer, *file)
+//  - al_str_read_file(*buffer, *file)
 //  - al_str_read_lines(*linebuffer, *file)
 //
 // USAGE:
@@ -773,7 +773,6 @@ typedef enum
 /*                        *
  *  ACLIB IMPLEMENTATION  *
  *                        */
-#define ACLIB_IMPLEMENTATION
 #ifdef ACLIB_IMPLEMENTATION
 
 
@@ -1371,6 +1370,157 @@ ACLIBDEF void __aclib_default_log_fn(Al_LogLevel loglvl, const char* fmt, ...)
 
 /* END OF LOGGING IMPLEMENTATION */
 
+
+
 #endif // ACLIB_IMPLEMENTATION
+
+
+
+/*                      *
+ *  ACLIB STRIP PREFIX  *
+ *                      */
+#ifdef ACLIB_STRIP_PREFIX
+
+
+/*                      *
+ *  VECTOR STRIP PREFIX  *
+ *                      */
+
+#define VEC_FOREACH AL_VEC_FOREACH
+
+#define VecDef Al_VecDef
+
+#define vec_owned_slice al_vec_owned_slice
+#define vec_slice_range al_vec_slice_range
+#define vec_from al_vec_from
+#define vec_push al_vec_push
+#define vec_unshift al_vec_unshift
+#define vec_append al_vec_append
+#define vec_prepend al_vec_prepend
+#define vec_pop al_vec_pop
+#define vec_shift al_vec_shift
+#define vec_clone_items al_vec_clone_items
+#define vec_empty al_vec_empty
+#define vec_free al_vec_free
+#define vec_ensure_cap al_vec_ensure_cap
+
+/* END OF VECTOR STRIP PREFIX */
+
+
+
+/*                      *
+ *  SLICE STRIP PREFIX  *
+ *                      */
+
+#define SliceDef Al_SliceDef
+
+#define slice_from al_slice_from
+#define slice_free al_slice_free
+
+/* END OF SLICE STRIP PREFIX */
+
+
+
+/*                       *
+ *  STRING STRIP PREFIX  *
+ *                       */
+
+#define STR_FMT AL_STR_FMT
+#define STR_ARG AL_STR_ARG
+
+#define String Al_String
+#define StrSlice Al_StrSlice
+#define StrVec Al_StrVec
+
+#define str_slice_with_len al_str_slice_with_len
+#define str_slice_from al_str_slice_from
+#define str_owned_slice al_str_owned_slice
+#define str_slice_clone al_str_slice_clone
+#define str_slice_range al_str_slice_range
+#define str_slice_free al_str_slice_free
+
+#define str_with_capacity al_str_with_capacity
+#define str_from al_str_from
+#define str_push al_str_push
+#define str_unshift al_str_unshift
+#define str_append al_str_append
+#define str_appendf al_str_appendf
+#define str_prepend al_str_prepend
+#define str_prependf al_str_prependf
+#define str_pop al_str_pop
+#define str_shift al_str_shift
+#define str_clone_chars al_str_clone_chars
+#define str_drain al_str_drain
+#define str_drain_range al_str_drain_range
+#define str_remove al_str_remove
+#define str_remove_range al_str_remove_range
+#define str_empty al_str_empty
+#define str_free al_str_free
+#define str_ensure_cap al_str_ensure_cap
+#define str_trim_front al_str_trim_front
+#define str_trim_back al_str_trim_back
+#define str_trim al_str_trim
+#define str_split_by al_str_split_by
+#define str_split_by_once al_str_split_by_once
+#define str_split_by_many al_str_split_by_many
+#define str_split_at al_str_split_at
+#define str_read_file al_str_read_file
+#define str_read_lines al_str_read_lines
+
+/* END OF STRING STRIP PREFIX */
+
+
+
+/*                      *
+ *  ASCII STRIP PREFIX  *
+ *                      */
+
+#define ascii_is_alphabetic al_ascii_is_alphabetic
+#define ascii_is_numeric al_ascii_is_numeric
+#define ascii_is_alphanumeric al_ascii_is_alphanumeric
+#define ascii_is_whitespace al_ascii_is_whitespace
+#define ascii_is_uppercase al_ascii_is_uppercase
+#define ascii_is_lowercase al_ascii_is_lowercase
+#define ascii_to_uppercase al_ascii_to_uppercase
+#define ascii_to_lowercase al_ascii_to_lowercase
+
+/* END OF ASCII STRIP PREFIX */
+
+
+
+/*                        *
+ *  LOGGING STRIP PREFIX  *
+ *                        */
+
+#define LogLevel Al_LogLevel
+#define log al_log
+#define todo al_todo
+
+/* END OF LOGGING STRIP PREFIX */
+
+
+
+/*                       *
+ *  RESULT STRIP PREFIX  *
+ *                       */
+
+#define ResTag Al_ResTag
+#define ResDef Al_ResDef
+#define res_ok al_res_ok
+#define res_err al_res_err
+#define res_try al_res_try
+#define res_unwrap al_res_unwrap
+#define res_unwrap_err al_res_unwrap_err
+#define res_unwrap_or al_res_unwrap_or
+#define res_unwrap_or_else al_res_unwrap_or_else
+#define res_map al_res_map
+#define res_map_err al_res_map_err
+
+/* END OF RESULT STRIP PREFIX */
+
+
+
+#endif // ACLIB_STRIP_PREFIX
+
 
 #endif // __ACLIB_H

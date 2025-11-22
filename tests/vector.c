@@ -1,3 +1,4 @@
+#define ACLIB_IMPLEMENTATION
 #include "../aclib.h"
 #include "test.h"
 
