@@ -1591,7 +1591,9 @@ ACLIBDEF void __aclib_default_log_fn(Ac_LogLevel loglvl, const char* fmt, ...)
 #define str_prepend ac_str_prepend
 #define str_prependf ac_str_prependf
 #define str_pop ac_str_pop
+#define str_pop_opt ac_str_pop_opt
 #define str_shift ac_str_shift
+#define str_shift_opt ac_str_shift_opt
 #define str_clone_chars ac_str_clone_chars
 #define str_drain ac_str_drain
 #define str_drain_range ac_str_drain_range
