@@ -63,6 +63,165 @@
 
 
 /*          *
+ *  RESULT  *
+ *          */
+// CONFIG DEFINES:
+//  -
+//
+// CONST DEFINES
+//  -
+//
+// TYPES AND TYPE MACROS:
+//  - Ac_ResTag
+//  - Ac_ResDef(T, E)
+//
+// FUNCTIONS AND MACROS:
+//  - ac_res_ok(val)
+//  - ac_res_err(val)
+//  - ac_res_try(res)
+//  - ac_res_unwrap(res)
+//  - ac_res_unwrap_err(res)
+//  - ac_res_unwrap_or(res, or)
+//  - ac_res_unwrap_or_else(res, or_fn)
+//  - ac_res_map(T, res, fn)
+//  - ac_res_map_err(T, res, fn)
+//
+// USAGE:
+
+/// The tag behind the Ac_Result
+typedef enum Ac_ResTag
+{
+    AC_RES_OK,
+    AC_RES_ERR,
+} Ac_ResTag;
+
+/// Define a new Result type with an ok type (T) and an err type (E)
+#define Ac_ResDef(T, E)                                                               \
+    struct                                                                            \
+    {                                                                                 \
+        /* The tag of this result. Determines what kind of value this object holds */ \
+        /* AC_RES_OK => res.ok */                                                     \
+        /* AC_RES_ERR => res.err */                                                   \
+        Ac_ResTag tag;                                                                \
+        union                                                                         \
+        {                                                                             \
+            T ok;                                                                     \
+            E err;                                                                    \
+        };                                                                            \
+    }
+
+
+/// Construct a new Result value, set to ok, and with a given value
+#define ac_res_ok(val) {.tag = AC_RES_OK, .ok = (val)}
+
+/// Construct a new Result value, set to err, and with a given error value
+#define ac_res_err(err_val) {.tag = AC_RES_ERR, .err = (err_val)}
+
+/// Unwrap a result, or return the error
+#define ac_res_try(T, res) \
+    ((res).tag == AC_RES_OK ? (res).ok : (({ return (T)ac_res_err((res).err); }), 0))
+
+/// Unwrap a result ok value. Asserts that the result has the ok tag
+#define ac_res_unwrap(res)                                                                        \
+    (ACLIB_ASSERT_FN((res).tag == AC_RES_OK && "Tried to unwrap result, but got tag AC_RES_ERR"), \
+     res.ok)
+
+/// Unwrap a result error value. Asserts that the result has the err tag
+#define ac_res_unwrap_err(res)                                               \
+    (ACLIB_ASSERT_FN((res).tag == AC_RES_ERR &&                              \
+                     "Tried to unwrap result error, but got tag AC_RES_OK"), \
+     res.ok)
+
+/// Unwrap a result ok value, or give the given or value
+#define ac_res_unwrap_or(res, or) ((res).tag == AC_RES_OK ? (res).ok : (or))
+
+/// Unwrap a result ok value, or give a value, returned from the ok_fn function
+#define ac_res_unwrap_or_else(res, or_fn) ((res).tag == AC_RES_OK ? (res).tag : (or_fn)())
+
+/// Run a function on an results ok value, or give the error
+#define ac_res_map(T, res, fn) \
+    ((res).tag == AC_RES_OK ? (T)ac_res_ok((fn)((res).ok)) : (T)ac_res_err((res).err))
+
+/// Run a function on an results err value, or give the ok valie
+#define ac_res_map_err(T, res, fn) \
+    ((res).tag == AC_RES_ERR ? (T)ac_res_err((fn)((res).err)) : (T)ac_res_ok((res).ok))
+
+
+/* END OF RESULT DECL */
+
+
+
+/*          *
+ *  OPTION  *
+ *          */
+// CONFIG DEFINES:
+//  -
+//
+// CONST DEFINES
+//  -
+//
+// TYPES AND TYPE MACROS:
+//  - Ac_OptTag
+//  - Ac_OptDef(T)
+//  - Ac_CharOpt
+//
+// FUNCTIONS AND MACROS:
+//  - ac_opt_some(val)
+//  - ac_opt_unwrap(opt)
+//  - ac_opt_unwrap_or(opt, or)
+//  - ac_opt_unwrap_or_else(opt, or_fn)
+//  - ac_opt_map(T, opt, fn)
+//
+// USAGE:
+
+/// The tag behind the Ac_Option
+typedef enum Ac_OptTag
+{
+    AC_OPT_SOME,
+    AC_OPT_NONE,
+} Ac_OptTag;
+
+/// Define a new Option type with an inner type of T
+#define Ac_OptDef(T)   \
+    struct             \
+    {                  \
+        Ac_OptTag tag; \
+        T some;        \
+    }
+
+/// An option holding a char
+typedef Ac_OptDef(char) Ac_CharOpt;
+
+/// Construct a new opt with a some value
+#define ac_opt_some(val) {.tag = AC_OPT_SOME, .some = (val)}
+
+/// Construct a none opt value
+#define ac_opt_none() {.tag = AC_OPT_NONE}
+
+/// Unrwap an options some value. Asserts that the tag is AC_OPT_SOME
+#define ac_opt_unwrap(opt)                                               \
+    (ACLIB_ASSERT_FN((opt).tag == AC_OPT_SOME &&                         \
+                     "Tried to unwrap option, but got tag AC_OPT_NONE"), \
+     (opt).some)
+
+
+/// Unwrap an option some value, or give the given or value
+#define ac_opt_unwrap_or(opt, or) ((opt).tag == AC_OPT_SOME ? (opt).some : (or))
+
+/// Unwrap an option some value, or give a value, returned from the or_fn function
+#define ac_opt_unwrap_or_else(res, or_fn) ((opt).tag == AC_OPT_SOME ? (opt).tag : (or_fn)())
+
+/// Run a function on an optipns some value, or give a none value
+#define ac_opt_map(T, opt, fn) \
+    ((opt).tag == AC_OPT_SOME ? (T)ac_opt_some((fn)((opt).some)) : (T)ac_opt_none())
+
+
+
+/* END OF OPTION DECL */
+
+
+
+/*          *
  *  VECTOR  *
  *          */
 // CONFIG DEFINES:
@@ -84,7 +243,9 @@
 //  - ac_vec_append(*vec, *arr, size)
 //  - ac_vec_prepend(*vec, *arr, size)
 //  - ac_vec_pop(*vec)
+//  - ac_vec_pop_opt(T, *vec)
 //  - ac_vec_shift(*vec, *out)
+//      - todo: ac_vec_shift_opt(*vec, *out)
 //  - ac_vec_clone_items(vec)
 //      - todo: ac_vec_drain(*vec)
 //      - todo: ac_vec_drain_range(*str, start, end)
@@ -217,6 +378,11 @@
     (ACLIB_ASSERT_FN((vec)->len >= 1 &&                                                     \
                      "Vector failed to pop, expected length of >= 1, but got length of 0"), \
      (vec)->len -= 1, ((vec)->items[(vec)->len]))
+
+/// Pops and returns the last element in the vector as an option. Returns with AC_OPT_NONE if there
+/// was no value to pop
+#define ac_vec_pop_opt(T, vec) \
+    ((vec)->len >= 1 ? ((T)ac_opt_some((vec)->items[--(vec)->len])) : (T)ac_opt_none())
 
 // Remove the first element in the vector, and puts it into out.
 /// This asserts that the vector has an element that can be shifted
@@ -371,7 +537,9 @@ void* __aclib_clone_arr(void* ptr, size_t size);
 //  - ac_str_prepend(*str, *chs)
 //  - ac_str_prependf(*str, *chs)
 //  - ac_str_pop(*str)
+//  - ac_str_pop_opt(*str)
 //  - ac_str_shift(*str)
+//  - ac_str_shift_opt(*str)
 //  - ac_str_clone_chars(str)
 //  - ac_str_drain(*str);
 //  - ac_str_drain_range(*str, start, end);
@@ -505,9 +673,17 @@ ACLIBDEF void ac_str_prependf(Ac_String* str, const char* fmt, ...);
 /// This asserts that the string has a char that can be popped
 ACLIBDEF char ac_str_pop(Ac_String* str);
 
+/// Pop and return the last char of a string as an Option, returning AC_OPT_NONE if there are no
+/// chars to pop
+ACLIBDEF Ac_CharOpt ac_str_pop_opt(Ac_String* str);
+
 /// Remove and return the first char of a string.
 /// This asserts that the string has a char that can be popped
 ACLIBDEF char ac_str_shift(Ac_String* str);
+
+/// Remove and return the first char of a string as an Option, returning AC_OPT_NONE if there are no
+/// chars to remove
+ACLIBDEF Ac_CharOpt ac_str_shift_opt(Ac_String* str);
 
 /// Clone the chars behind a string, and return them as an owned string slice.
 /// The caller is responsible for freeing the allocated cstr
@@ -678,161 +854,6 @@ ACLIBDEF void __aclib_default_log_fn(Ac_LogLevel loglvl, const char* fmt, ...);
 #define ac_todo(msg) (ac_log(ACLIB_ERR, "%s:%d: TODO: %s\n", __FILE__, __LINE__, (msg)), abort())
 
 /* END OF LOGGING DECL */
-
-
-
-/*          *
- *  RESULT  *
- *          */
-// CONFIG DEFINES:
-//  -
-//
-// CONST DEFINES
-//  -
-//
-// TYPES AND TYPE MACROS:
-//  - Ac_ResTag
-//  - Ac_ResDef(T, E)
-//
-// FUNCTIONS AND MACROS:
-//  - ac_res_ok(val)
-//  - ac_res_err(val)
-//  - ac_res_try(res)
-//  - ac_res_unwrap(res)
-//  - ac_res_unwrap_err(res)
-//  - ac_res_unwrap_or(res, or)
-//  - ac_res_unwrap_or_else(res, or_fn)
-//  - ac_res_map(T, res, fn)
-//  - ac_res_map_err(T, res, fn)
-//
-// USAGE:
-
-/// The tag behind the Ac_Result
-typedef enum Ac_ResTag
-{
-    AC_RES_OK,
-    AC_RES_ERR,
-} Ac_ResTag;
-
-/// Define a new Result type with an ok type (T) and an err type (E)
-#define Ac_ResDef(T, E)                                                               \
-    struct                                                                            \
-    {                                                                                 \
-        /* The tag of this result. Determines what kind of value this object holds */ \
-        /* AC_RES_OK => res.ok */                                                     \
-        /* AC_RES_ERR => res.err */                                                   \
-        Ac_ResTag tag;                                                                \
-        union                                                                         \
-        {                                                                             \
-            T ok;                                                                     \
-            E err;                                                                    \
-        };                                                                            \
-    }
-
-
-/// Construct a new Result value, set to ok, and with a given value
-#define ac_res_ok(val) {.tag = AC_RES_OK, .ok = (val)}
-
-/// Construct a new Result value, set to err, and with a given error value
-#define ac_res_err(err_val) {.tag = AC_RES_ERR, .err = (err_val)}
-
-/// Unwrap a result, or return the error
-#define ac_res_try(T, res) \
-    ((res).tag == AC_RES_OK ? (res).ok : (({ return (T)ac_res_err((res).err); }), 0))
-
-/// Unwrap a result ok value. Asserts that the result has the ok tag
-#define ac_res_unwrap(res)                                                                        \
-    (ACLIB_ASSERT_FN((res).tag == AC_RES_OK && "Tried to unwrap result, but got tag AC_RES_ERR"), \
-     res.ok)
-
-/// Unwrap a result error value. Asserts that the result has the err tag
-#define ac_res_unwrap_err(res)                                               \
-    (ACLIB_ASSERT_FN((res).tag == AC_RES_ERR &&                              \
-                     "Tried to unwrap result error, but got tag AC_RES_OK"), \
-     res.ok)
-
-/// Unwrap a result ok value, or give the given or value
-#define ac_res_unwrap_or(res, or) ((res).tag == AC_RES_OK ? (res).ok : (or))
-
-/// Unwrap a result ok value, or give a value, returned from the ok_fn function
-#define ac_res_unwrap_or_else(res, or_fn) ((res).tag == AC_RES_OK ? (res).tag : (or_fn)())
-
-/// Run a function on an results ok value, or give the error
-#define ac_res_map(T, res, fn) \
-    ((res).tag == AC_RES_OK ? (T)ac_res_ok((fn)((res).ok)) : (T)ac_res_err((res).err))
-
-/// Run a function on an results err value, or give the ok valie
-#define ac_res_map_err(T, res, fn) \
-    ((res).tag == AC_RES_ERR ? (T)ac_res_err((fn)((res).err)) : (T)ac_res_ok((res).ok))
-
-
-/* END OF RESULT DECL */
-
-
-
-/*          *
- *  RESULT  *
- *          */
-// CONFIG DEFINES:
-//  -
-//
-// CONST DEFINES
-//  -
-//
-// TYPES AND TYPE MACROS:
-//  - Ac_OptTag
-//  - Ac_OptDef(T)
-//
-// FUNCTIONS AND MACROS:
-//  - ac_opt_some(val)
-//  - ac_opt_unwrap(opt)
-//  - ac_opt_unwrap_or(opt, or)
-//  - ac_opt_unwrap_or_else(opt, or_fn)
-//  - ac_opt_map(T, opt, fn)
-//
-// USAGE:
-
-/// The tag behind the Ac_Option
-typedef enum Ac_OptTag
-{
-    AC_OPT_SOME,
-    AC_OPT_NONE,
-} Ac_OptTag;
-
-/// Define a new Option type with an inner type of T
-#define Ac_OptDef(T)   \
-    struct             \
-    {                  \
-        Ac_OptTag tag; \
-        T some;        \
-    }
-
-/// Construct a new opt with a some value
-#define ac_opt_some(val) {.tag = AC_OPT_SOME, .some = (val)}
-
-/// Construct a none opt value
-#define ac_opt_none() {.tag = AC_OPT_NONE}
-
-/// Unrwap an options some value. Asserts that the tag is AC_OPT_SOME
-#define ac_opt_unwrap(opt)                                               \
-    (ACLIB_ASSERT_FN((opt).tag == AC_OPT_SOME &&                         \
-                     "Tried to unwrap option, but got tag AC_OPT_NONE"), \
-     (opt).some)
-
-
-/// Unwrap an option some value, or give the given or value
-#define ac_opt_unwrap_or(opt, or) ((opt).tag == AC_OPT_SOME ? (opt).some : (or))
-
-/// Unwrap an option some value, or give a value, returned from the or_fn function
-#define ac_opt_unwrap_or_else(res, or_fn) ((opt).tag == AC_OPT_SOME ? (opt).tag : (or_fn)())
-
-/// Run a function on an optipns some value, or give a none value
-#define ac_opt_map(T, opt, fn) \
-    ((opt).tag == AC_OPT_SOME ? (T)ac_opt_some((fn)((opt).some)) : (T)ac_opt_none())
-
-
-
-/* END OF RESULT DECL */
 
 
 
@@ -1024,7 +1045,17 @@ ACLIBDEF char ac_str_pop(Ac_String* str)
     ACLIB_ASSERT_FN(str->len >= 1 &&
                     "String failed to pop, expected length of >= 1, but got length of 0");
     str->len -= 1;
-    return str->chars[str->len];
+    char popped = str->chars[str->len];
+    str->chars[str->len] = '\0';
+    return popped;
+}
+
+ACLIBDEF Ac_CharOpt ac_str_pop_opt(Ac_String* str)
+{
+    if (str->len == 0)
+        return (Ac_CharOpt)ac_opt_none();
+
+    return (Ac_CharOpt)ac_opt_some(ac_str_pop(str));
 }
 
 ACLIBDEF char ac_str_shift(Ac_String* str)
@@ -1036,8 +1067,17 @@ ACLIBDEF char ac_str_shift(Ac_String* str)
 
     memcpy(str->chars, str->chars + 1, (str->len - 1) * sizeof(char));
     str->len -= 1;
+    str->chars[str->len] = '\0';
 
     return shifted;
+}
+
+ACLIBDEF Ac_CharOpt ac_str_shift_opt(Ac_String* str)
+{
+    if (str->len == 0)
+        return (Ac_CharOpt)ac_opt_none();
+
+    return (Ac_CharOpt)ac_opt_some(ac_str_shift(str));
 }
 
 ACLIBDEF char* ac_str_clone_chars(Ac_String str)
@@ -1448,6 +1488,42 @@ ACLIBDEF void __aclib_default_log_fn(Ac_LogLevel loglvl, const char* fmt, ...)
 #ifdef ACLIB_STRIP_PREFIX
 
 
+
+/*                       *
+ *  RESULT STRIP PREFIX  *
+ *                       */
+
+#define ResTag Ac_ResTag
+#define ResDef Ac_ResDef
+#define res_ok ac_res_ok
+#define res_err ac_res_err
+#define res_try ac_res_try
+#define res_unwrap ac_res_unwrap
+#define res_unwrap_err ac_res_unwrap_err
+#define res_unwrap_or ac_res_unwrap_or
+#define res_unwrap_or_else ac_res_unwrap_or_else
+#define res_map ac_res_map
+#define res_map_err ac_res_map_err
+
+/* END OF RESULT STRIP PREFIX */
+
+
+
+/*                       *
+ *  OPTION STRIP PREFIX  *
+ *                       */
+
+#define OptTag Ac_OptTag
+#define OptDef Ac_OptDef
+#define CharOpt Ac_CharOpt
+#define opt_some ac_opt_some
+#define opt_unwrap ac_opt_unwrap
+#define opt_unwrap_or ac_opt_unwrap_or
+#define opt_unwrap_or_else ac_opt_unwrap_or_else
+#define opt_map ac_opt_map
+
+/* END OF RESULT STRIP PREFIX */
+
 /*                      *
  *  VECTOR STRIP PREFIX  *
  *                      */
@@ -1464,6 +1540,7 @@ ACLIBDEF void __aclib_default_log_fn(Ac_LogLevel loglvl, const char* fmt, ...)
 #define vec_append ac_vec_append
 #define vec_prepend ac_vec_prepend
 #define vec_pop ac_vec_pop
+#define vec_pop_opt ac_vec_pop_opt
 #define vec_shift ac_vec_shift
 #define vec_clone_items ac_vec_clone_items
 #define vec_empty ac_vec_empty
@@ -1563,42 +1640,6 @@ ACLIBDEF void __aclib_default_log_fn(Ac_LogLevel loglvl, const char* fmt, ...)
 #define todo ac_todo
 
 /* END OF LOGGING STRIP PREFIX */
-
-
-
-/*                       *
- *  RESULT STRIP PREFIX  *
- *                       */
-
-#define ResTag Ac_ResTag
-#define ResDef Ac_ResDef
-#define res_ok ac_res_ok
-#define res_err ac_res_err
-#define res_try ac_res_try
-#define res_unwrap ac_res_unwrap
-#define res_unwrap_err ac_res_unwrap_err
-#define res_unwrap_or ac_res_unwrap_or
-#define res_unwrap_or_else ac_res_unwrap_or_else
-#define res_map ac_res_map
-#define res_map_err ac_res_map_err
-
-/* END OF RESULT STRIP PREFIX */
-
-
-
-/*                       *
- *  OPTION STRIP PREFIX  *
- *                       */
-
-#define OptTag Ac_OptTag
-#define OptDef Ac_OptDef
-#define opt_some ac_opt_some
-#define opt_unwrap ac_opt_unwrap
-#define opt_unwrap_or ac_opt_unwrap_or
-#define opt_unwrap_or_else ac_opt_unwrap_or_else
-#define opt_map ac_opt_map
-
-/* END OF RESULT STRIP PREFIX */
 
 
 

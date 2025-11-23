@@ -141,6 +141,60 @@ int main(void)
         ac_str_free(&str);
     });
 
+    TEST(pop_opt_some, {
+        Ac_String str = ac_str_from("foobar");
+        ASSERT_EQ((size_t)6, str.len, "%zu");
+
+        Ac_CharOpt opt = ac_str_pop_opt(&str);
+
+        ASSERT_EQ((size_t)5, str.len, "%zu");
+        ASSERT_STR_EQ("fooba", str.chars);
+
+        ASSERT_EQ(AC_OPT_SOME, opt.tag, "{tag: %d}");
+        ASSERT_EQ('r', opt.some, "%d");
+
+        ac_str_free(&str);
+    });
+
+    TEST(pop_opt_empty, {
+        Ac_String str = {0};
+        ASSERT_EQ((size_t)0, str.len, "%zu");
+
+        Ac_CharOpt opt = ac_str_pop_opt(&str);
+
+        ASSERT_EQ((size_t)0, str.len, "%zu");
+
+        ASSERT_EQ(AC_OPT_NONE, opt.tag, "{tag: %d}");
+
+        ac_str_free(&str);
+    });
+
+    TEST(shift_opt_some, {
+        Ac_String str = ac_str_from("foobar");
+        ASSERT_EQ((size_t)6, str.len, "%zu");
+
+        Ac_CharOpt opt = ac_str_shift_opt(&str);
+
+        ASSERT_EQ((size_t)5, str.len, "%zu");
+        ASSERT_STR_EQ("oobar", str.chars);
+
+        ASSERT_EQ(AC_OPT_SOME, opt.tag, "{tag: %d}");
+        ASSERT_EQ('f', opt.some, "%d");
+
+        ac_str_free(&str);
+    });
+
+    TEST(shift_opt_empty, {
+        Ac_String str = {0};
+        ASSERT_EQ((size_t)0, str.len, "%zu");
+
+        Ac_CharOpt opt = ac_str_shift_opt(&str);
+
+        ASSERT_EQ(AC_OPT_NONE, opt.tag, "{tag: %d}");
+
+        ac_str_free(&str);
+    });
+
     TEST(simple_empty, {
         Ac_String str = ac_str_from("foobar");
 

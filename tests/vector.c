@@ -3,6 +3,7 @@
 #include "test.h"
 
 typedef Ac_VecDef(int) IntVec;
+typedef Ac_OptDef(int) IntOpt;
 
 int main(void)
 {
@@ -47,6 +48,34 @@ int main(void)
         int popped = ac_vec_pop(&ivec);
         ASSERT_EQ(1, popped, "%d");
         ASSERT_EQ((size_t)0, ivec.len, "%zu");
+        ac_vec_free(ivec);
+    });
+
+    TEST(pop_opt_some, {
+        IntVec ivec = ac_vec_from(((int[]){1, 2, 3}), 3);
+        ASSERT_EQ((size_t)3, ivec.len, "%zu");
+
+        IntOpt opt = ac_vec_pop_opt(IntOpt, &ivec);
+
+        ASSERT_EQ((size_t)2, ivec.len, "%zu");
+        ASSERT_ARR_EQ(((int[]){1, 2}), ivec.items, ivec.len, "%d");
+
+        ASSERT_EQ(AC_OPT_SOME, opt.tag, "{tag: %d}");
+        ASSERT_EQ(3, opt.some, "%d");
+
+        ac_vec_free(ivec);
+    });
+
+    TEST(pop_opt_empty, {
+        IntVec ivec = {0};
+        ASSERT_EQ((size_t)0, ivec.len, "%zu");
+
+        IntOpt opt = ac_vec_pop_opt(IntOpt, &ivec);
+
+        ASSERT_EQ((size_t)0, ivec.len, "%zu");
+
+        ASSERT_EQ(AC_OPT_NONE, opt.tag, "{tag: %d}");
+
         ac_vec_free(ivec);
     });
 
