@@ -5,7 +5,7 @@
 
 #include <stdio.h>
 
-void simple_log(Al_LogLevel loglvl, const char* fmt, ...);
+void simple_log(Ac_LogLevel loglvl, const char* fmt, ...);
 void reset_file(FILE** fd, char* buf, size_t buf_size);
 
 int main(void)
@@ -22,9 +22,9 @@ int main(void)
     TEST(log_printing, {
         for (int i = 0; i < 5; i++)
         {
-            Al_LogLevel lvl = (Al_LogLevel)i;
+            Ac_LogLevel lvl = (Ac_LogLevel)i;
             aclib_log_level = lvl;
-            al_log(lvl, "foobar");
+            ac_log(lvl, "foobar");
             ASSERT_STR_EQ("foobar", outbuf);
             reset_file(&aclib_log_fd, outbuf, 256);
         }
@@ -34,7 +34,7 @@ int main(void)
     TEST(no_logs, {
         aclib_log_level = ACLIB_NO_LOGS;
         for (int i = 0; i < ACLIB_NO_LOGS; i++)
-            al_log((Al_LogLevel)i, "foobar");
+            ac_log((Ac_LogLevel)i, "foobar");
 
         ASSERT_EQ((unsigned long)0, strlen(outbuf), "%lu");
     });
@@ -43,7 +43,7 @@ int main(void)
     TEST_END;
 }
 
-void simple_log(Al_LogLevel loglvl, const char* fmt, ...)
+void simple_log(Ac_LogLevel loglvl, const char* fmt, ...)
 {
     if (loglvl < aclib_log_level)
         return;

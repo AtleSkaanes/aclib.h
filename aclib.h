@@ -70,37 +70,37 @@
 //  - ACLIB_VEC_START_CAP
 //
 // CONST DEFINES:
-//  - AL_VEC_FOREACH
+//  - AC_VEC_FOREACH
 //
 // TYPES AND TYPE MACROS:
-//  - Al_VecDef(T)
+//  - Ac_VecDef(T)
 //
 // FUNCTIONS/MACROS:
-//  - al_vec_owned_slice(vec)
-//  - al_vec_slice_range(arr, start, end)
-//  - al_vec_from(*arr, size)
-//  - al_vec_push(*vec, item)
-//  - al_vec_unshift(*vec, item)
-//  - al_vec_append(*vec, *arr, size)
-//  - al_vec_prepend(*vec, *arr, size)
-//  - al_vec_pop(*vec)
-//  - al_vec_shift(*vec, *out)
-//  - al_vec_clone_items(vec)
-//      - todo: al_vec_drain(*vec)
-//      - todo: al_vec_drain_range(*str, start, end)
-//      - todo: al_vec_remove(*vec, idx)
-//      - todo: al_vec_remove_range(*vec, start, end)
-//  - al_vec_empty(*vec)
-//      - todo: al_vec_split_at(vec, idx)
-//  - al_vec_free(vec)
-//  - al_vec_ensure_cap(vec, new_cap)
+//  - ac_vec_owned_slice(vec)
+//  - ac_vec_slice_range(arr, start, end)
+//  - ac_vec_from(*arr, size)
+//  - ac_vec_push(*vec, item)
+//  - ac_vec_unshift(*vec, item)
+//  - ac_vec_append(*vec, *arr, size)
+//  - ac_vec_prepend(*vec, *arr, size)
+//  - ac_vec_pop(*vec)
+//  - ac_vec_shift(*vec, *out)
+//  - ac_vec_clone_items(vec)
+//      - todo: ac_vec_drain(*vec)
+//      - todo: ac_vec_drain_range(*str, start, end)
+//      - todo: ac_vec_remove(*vec, idx)
+//      - todo: ac_vec_remove_range(*vec, start, end)
+//  - ac_vec_empty(*vec)
+//      - todo: ac_vec_split_at(vec, idx)
+//  - ac_vec_free(vec)
+//  - ac_vec_ensure_cap(vec, new_cap)
 //
 //
 // USAGE:
 //  # DEFINING
 //  Define a vector type with the `VecDef(T)` macro, e.g:
 //  ```c
-//  typedef Al_VecDef(int) IntVec;
+//  typedef Ac_VecDef(int) IntVec;
 //  ```
 //
 //  # INITIALIZING
@@ -110,20 +110,20 @@
 //  ```
 //
 //  # USING
-//  After you have a vector initialized, you can manipulate it with macros. Such as `al_vec_push()`
+//  After you have a vector initialized, you can manipulate it with macros. Such as `ac_vec_push()`
 //  for pushing a new element
 //  ```c
 //  IntVec ivec = {0};
 //
-//  al_vec_push(&ivec, 1); // -> ivec = { 1 }
-//  al_vec_push(&ivec, 2); // -> ivec = { 1, 2 }
-//  al_vec_push(&ivec, 3); // -> ivec = { 1, 2, 3 }
+//  ac_vec_push(&ivec, 1); // -> ivec = { 1 }
+//  ac_vec_push(&ivec, 2); // -> ivec = { 1, 2 }
+//  ac_vec_push(&ivec, 3); // -> ivec = { 1, 2, 3 }
 //  ```
 //
 //  # FREEING
-//  Remember to free the vector after use with `al_vec_free()`, to avoid memory leaks
+//  Remember to free the vector after use with `ac_vec_free()`, to avoid memory leaks
 //  ```c
-//  al_vec_free(al);
+//  ac_vec_free(al);
 //  ```
 
 #ifndef ACLIB_VEC_GROWTH_RATE
@@ -137,7 +137,7 @@
 #endif
 
 /// Define a Vector struct with the given inner type T
-#define Al_VecDef(T) \
+#define Ac_VecDef(T) \
     struct           \
     {                \
         T* items;    \
@@ -146,25 +146,25 @@
     }
 
 /// Iterate over a vector or slice
-#define AL_VEC_FOREACH(T, vec, elem) \
+#define AC_VEC_FOREACH(T, vec, elem) \
     for (T* elem = (vec).items; (elem) < (vec).items + (vec).len; (elem)++)
 
 /// Create an owned slice from a vector.
-/// The caller is responsible for freeing the new slice with `al_slice_free()` after use
-#define al_vec_owned_slice(vec) al_slice_from((al_vec_clone_items((vec))), (vec).len)
+/// The caller is responsible for freeing the new slice with `ac_slice_free()` after use
+#define ac_vec_owned_slice(vec) ac_slice_from((ac_vec_clone_items((vec))), (vec).len)
 
 // Slice a vector in a range from start to end.
 // This does not clone or copy any of the elements of the vector, and the vector is still
 // responsible for the memory
-#define al_vec_slice_range(T, arr, start, end)                           \
+#define ac_vec_slice_range(T, arr, start, end)                           \
     (((start) < (arr).len || (end) < (arr).len)                          \
          ? ((T){.items = (arr).items + (start), .len = (end) - (start)}) \
          : ((T){0}))
 
 /// Create a new vector from a pointer or array. This will clone the contents of the pointer or
 /// array.
-/// The caller is responsible for freeing the new vector with `al_vec_free()`
-#define al_vec_from(arr, size)                                      \
+/// The caller is responsible for freeing the new vector with `ac_vec_free()`
+#define ac_vec_from(arr, size)                                      \
     {                                                               \
         .items = __aclib_clone_arr((arr), (size) * sizeof(*(arr))), \
         .len = (size),                                              \
@@ -172,18 +172,18 @@
     }
 
 /// Push an item to a vector
-#define al_vec_push(vec, item)                    \
+#define ac_vec_push(vec, item)                    \
     {                                             \
-        al_vec_ensure_cap((vec), (vec)->len + 1); \
+        ac_vec_ensure_cap((vec), (vec)->len + 1); \
         (vec)->items[(vec)->len] = (item);        \
         (vec)->len += 1;                          \
     }
 
 
 /// Add an element to the front of the vector
-#define al_vec_unshift(vec, item)                           \
+#define ac_vec_unshift(vec, item)                           \
     {                                                       \
-        al_vec_ensure_cap((vec), (vec)->len + 1);           \
+        ac_vec_ensure_cap((vec), (vec)->len + 1);           \
         memcpy((vec)->items + 1, (vec)->items, (vec)->len); \
         (vec)->items[0] = (item);                           \
         (vec)->len++;                                       \
@@ -191,18 +191,18 @@
 
 
 /// Append a list of items to a vector
-#define al_vec_append(vec, arr, size)                  \
+#define ac_vec_append(vec, arr, size)                  \
     {                                                  \
-        al_vec_ensure_cap((vec), (vec)->len + (size)); \
+        ac_vec_ensure_cap((vec), (vec)->len + (size)); \
         for (size_t i = 0; i < (size); i++)            \
             (vec)->items[(vec)->len + i] = (arr)[i];   \
         (vec)->len += (size);                          \
     }
 
 /// Prepend a list of items to the front of the vector
-#define al_vec_prepend(vec, arr, size)                                             \
+#define ac_vec_prepend(vec, arr, size)                                             \
     {                                                                              \
-        al_vec_ensure_cap((vec), (vec)->len + (size));                             \
+        ac_vec_ensure_cap((vec), (vec)->len + (size));                             \
         /* Move all current items to make space in front */                        \
         memmove((vec)->items + (size), (vec)->items, (vec)->len * sizeof(*(arr))); \
         /* Add the items from the arr */                                           \
@@ -213,14 +213,14 @@
 
 /// Pops and returns the last element in the vector.
 /// This asserts that the vector has an element that can be popped
-#define al_vec_pop(vec)                                                                     \
+#define ac_vec_pop(vec)                                                                     \
     (ACLIB_ASSERT_FN((vec)->len >= 1 &&                                                     \
                      "Vector failed to pop, expected length of >= 1, but got length of 0"), \
      (vec)->len -= 1, ((vec)->items[(vec)->len]))
 
 // Remove the first element in the vector, and puts it into out.
 /// This asserts that the vector has an element that can be shifted
-#define al_vec_shift(vec, out)                                                                   \
+#define ac_vec_shift(vec, out)                                                                   \
     {                                                                                            \
         ACLIB_ASSERT_FN((vec)->len >= 1 &&                                                       \
                         "Vector failed to shift, expected length of >= 1, but got length of 0"); \
@@ -231,14 +231,14 @@
 
 /// Clone the items of a vector, returning them as an allocated pointer.
 /// The caller is responsible for freeing the new pointer
-#define al_vec_clone_items(vec) \
+#define ac_vec_clone_items(vec) \
     ((vec).cap > 0 ? __aclib_clone_arr((vec).items, (vec).len * sizeof((vec).items[0])) : 0)
 
 /// Empty the given vector. This does not free or remove any memory
-#define al_vec_empty(vec) (vec)->len = 0
+#define ac_vec_empty(vec) (vec)->len = 0
 
 /// Free the given vector and its contents
-#define al_vec_free(vec)   \
+#define ac_vec_free(vec)   \
     {                      \
         free((vec).items); \
         (vec).items = 0;   \
@@ -248,7 +248,7 @@
 
 
 /// Ensure that a vector has atleast the given capacity.
-#define al_vec_ensure_cap(vec, new_cap)                                                      \
+#define ac_vec_ensure_cap(vec, new_cap)                                                      \
     if ((vec)->cap < new_cap)                                                                \
     {                                                                                        \
         size_t calced_cap;                                                                   \
@@ -264,7 +264,7 @@
                                                                                              \
         if ((vec)->items == NULL)                                                            \
         {                                                                                    \
-            al_log(ACLIB_ERR, "Failed to reallocate vector\n");                              \
+            ac_log(ACLIB_ERR, "Failed to reallocate vector\n");                              \
             exit(EXIT_FAILURE);                                                              \
         }                                                                                    \
                                                                                              \
@@ -287,18 +287,18 @@ void* __aclib_clone_arr(void* ptr, size_t size);
 //  -
 //
 // TYPES AND TYPE MACROS:
-//  - Al_SliceDef(T)
+//  - Ac_SliceDef(T)
 //
 // FUNCTIONS AND MACROS:
-//  - al_slice_from(arr, size)
-//  - al_slice_free(slice)
-//      - todo: al_slice_clone(slice)
+//  - ac_slice_from(arr, size)
+//  - ac_slice_free(slice)
+//      - todo: ac_slice_clone(slice)
 //
 // USAGE:
 //  # DEFINING
 //  Define a slice type with the `VecDef(T)` macro, e.g:
 //  ```c
-//  typedef Al_SliceDef(int) IntSlice;
+//  typedef Ac_SliceDef(int) IntSlice;
 //  ```
 //
 //  # INITIALIZING
@@ -308,7 +308,7 @@ void* __aclib_clone_arr(void* ptr, size_t size);
 //  ```
 
 /// Define a Slice struct with the given inner type T
-#define Al_SliceDef(T) \
+#define Ac_SliceDef(T) \
     struct             \
     {                  \
         T* items;      \
@@ -318,9 +318,9 @@ void* __aclib_clone_arr(void* ptr, size_t size);
 
 /// Create a new slice from a pointer, and a len.
 /// This will not clone or copy the items in the array, so it will not own the contents.
-/// Do not use `al_slice_free()` on a slice from this, unless you know what you are doing, as that
+/// Do not use `ac_slice_free()` on a slice from this, unless you know what you are doing, as that
 /// would free the original contents.
-#define al_slice_from(arr, size) \
+#define ac_slice_from(arr, size) \
     {                            \
         .items = arr,            \
         .len = size,             \
@@ -329,7 +329,7 @@ void* __aclib_clone_arr(void* ptr, size_t size);
 
 /// Free a slice. Be sure that the slice owns its contents before calling this, as it otherwise can
 /// create memory issues
-#define al_slice_free(slice)  \
+#define ac_slice_free(slice)  \
     {                         \
         free((slice)->items); \
         (slice)->len = 0;     \
@@ -346,55 +346,55 @@ void* __aclib_clone_arr(void* ptr, size_t size);
 //  -
 //
 // CONST DEFINES
-//  - AL_STR_FMT
-//  - AL_STR_ARG
+//  - AC_STR_FMT
+//  - AC_STR_ARG
 //
 // TYPES AND TYPE MACROS:
-//  - Al_String
-//  - Al_StrSlice
-//  - Al_StrVec
+//  - Ac_String
+//  - Ac_StrSlice
+//  - Ac_StrVec
 //
 // FUNCTIONS AND MACROS:
-//  - al_str_slice_with_len(len)
-//  - al_str_slice_from(chs)
-//  - al_str_owned_slice(str)
-//  - al_str_slice_clone(slice)
-//  - al_str_slice_range(str, start, end)
-//  - al_str_slice_free(*slice)
+//  - ac_str_slice_with_len(len)
+//  - ac_str_slice_from(chs)
+//  - ac_str_owned_slice(str)
+//  - ac_str_slice_clone(slice)
+//  - ac_str_slice_range(str, start, end)
+//  - ac_str_slice_free(*slice)
 //
-//  - al_str_with_capacity(capacity)
-//  - al_str_from(*chs)
-//  - al_str_push(*str, ch)
-//  - al_str_unshift(*str, ch)
-//  - al_str_append(*str, *chs)
-//  - al_str_appendf(*str, *fmt, ...)
-//  - al_str_prepend(*str, *chs)
-//  - al_str_prependf(*str, *chs)
-//  - al_str_pop(*str)
-//  - al_str_shift(*str)
-//  - al_str_clone_chars(str)
-//  - al_str_drain(*str);
-//  - al_str_drain_range(*str, start, end);
-//  - al_str_remove(*str, idx)
-//  - al_str_remove_range(*str, start, end)
-//  - al_str_empty(*str)
-//  - al_str_free(*str)
-//  - al_str_ensure_cap(*str, new_cap)
-//  - al_str_trim_front(*str)
-//  - al_str_trim_back(*str)
-//  - al_str_trim(*str)
-//  - al_str_split_by(str, delim)
-//  - al_str_split_by_once(str, delim)
-//  - al_str_split_by_many(str, *delims)
-//  - al_str_split_at(str, idx)
-//  - al_str_read_file(*buffer, *file)
-//  - al_str_read_lines(*linebuffer, *file)
+//  - ac_str_with_capacity(capacity)
+//  - ac_str_from(*chs)
+//  - ac_str_push(*str, ch)
+//  - ac_str_unshift(*str, ch)
+//  - ac_str_append(*str, *chs)
+//  - ac_str_appendf(*str, *fmt, ...)
+//  - ac_str_prepend(*str, *chs)
+//  - ac_str_prependf(*str, *chs)
+//  - ac_str_pop(*str)
+//  - ac_str_shift(*str)
+//  - ac_str_clone_chars(str)
+//  - ac_str_drain(*str);
+//  - ac_str_drain_range(*str, start, end);
+//  - ac_str_remove(*str, idx)
+//  - ac_str_remove_range(*str, start, end)
+//  - ac_str_empty(*str)
+//  - ac_str_free(*str)
+//  - ac_str_ensure_cap(*str, new_cap)
+//  - ac_str_trim_front(*str)
+//  - ac_str_trim_back(*str)
+//  - ac_str_trim(*str)
+//  - ac_str_split_by(str, delim)
+//  - ac_str_split_by_once(str, delim)
+//  - ac_str_split_by_many(str, *delims)
+//  - ac_str_split_at(str, idx)
+//  - ac_str_read_file(*buffer, *file)
+//  - ac_str_read_lines(*linebuffer, *file)
 //
 // USAGE:
 //  # DEFINING
 //  Define a slice type with the `VecDef(T)` macro, e.g:
 //  ```c
-//  typedef Al_SliceDef(int) IntVec;
+//  typedef Ac_SliceDef(int) IntVec;
 //  ```
 //
 //  # INITIALIZING
@@ -404,24 +404,24 @@ void* __aclib_clone_arr(void* ptr, size_t size);
 //  ```
 //
 //  # USING
-//  After you have a vector initialized, you can manipulate it with macros. Such as `al_vec_push()`
+//  After you have a vector initialized, you can manipulate it with macros. Such as `ac_vec_push()`
 //  for pushing a new element
 //  ```c
 //  IntVec ivec = {0};
 //
-//  al_vec_push(&ivec, 1); // -> ivec = { 1 }
-//  al_vec_push(&ivec, 2); // -> ivec = { 1, 2 }
-//  al_vec_push(&ivec, 3); // -> ivec = { 1, 2, 3 }
+//  ac_vec_push(&ivec, 1); // -> ivec = { 1 }
+//  ac_vec_push(&ivec, 2); // -> ivec = { 1, 2 }
+//  ac_vec_push(&ivec, 3); // -> ivec = { 1, 2, 3 }
 //  ```
 //
 //  # FREEING
-//  Remember to free the vector after use with `al_vec_free()`, to avoid memory leaks
+//  Remember to free the vector after use with `ac_vec_free()`, to avoid memory leaks
 //  ```c
-//  al_vec_free(al);
+//  ac_vec_free(al);
 //  ```
 
 /// A dynamic and owned string
-typedef struct Al_String
+typedef struct Ac_String
 {
     /// The characters of the string. Can be used as a cstr
     char* chars;
@@ -429,142 +429,142 @@ typedef struct Al_String
     size_t len;
     /// The capacity of the string
     size_t cap;
-} Al_String;
+} Ac_String;
 
 
 /// A string slice, which holds a cstr and a length
-typedef struct Al_StrSlice
+typedef struct Ac_StrSlice
 {
     /// The characters of the string slice. Can be used as a cstr
     char* chars;
     /// The length of the string slice
     size_t len;
-} Al_StrSlice;
+} Ac_StrSlice;
 
-/// A format string used to print strings and string slices properly. Remember to use `AL_STR_ARG()`
+/// A format string used to print strings and string slices properly. Remember to use `AC_STR_ARG()`
 /// as the format argument.
-#define AL_STR_FMT "%.*s"
+#define AC_STR_FMT "%.*s"
 /// The arg used
-#define AL_STR_ARG(str) (int)(str).len, (str).chars
+#define AC_STR_ARG(str) (int)(str).len, (str).chars
 
 /// A vector containing string slices.
 /// To avoid leaking memory, remember to free each individual string slice by themselves, as
 /// `vec_free` will not do this for you.
-typedef Al_VecDef(Al_StrSlice) Al_StrVec;
+typedef Ac_VecDef(Ac_StrSlice) Ac_StrVec;
 
 /// Allocate a new empty string slice with a specific length. The caller is responsible for freeing
-/// the memory with `al_slice_free()`
-ACLIBDEF Al_StrSlice al_str_slice_with_len(size_t len);
+/// the memory with `ac_slice_free()`
+ACLIBDEF Ac_StrSlice ac_str_slice_with_len(size_t len);
 
 /// Get a slice to a c string, this will not copy or clone the chars, just point to them.
-ACLIBDEF Al_StrSlice al_str_slice_from(char* chs);
+ACLIBDEF Ac_StrSlice ac_str_slice_from(char* chs);
 
 /// Get an owned slice to the contents of a string. The caller is responsible for freeing the new
-/// slice with `al_str_slice_free(slice)`
-ACLIBDEF Al_StrSlice al_str_owned_slice(Al_String str);
+/// slice with `ac_str_slice_free(slice)`
+ACLIBDEF Ac_StrSlice ac_str_owned_slice(Ac_String str);
 
 /// Clone a string slice and its chars.
-/// The caller i responsible for freeing the slice with `al_str_slice_free()`
-ACLIBDEF Al_StrSlice al_str_slice_clone(Al_StrSlice slice);
+/// The caller i responsible for freeing the slice with `ac_str_slice_free()`
+ACLIBDEF Ac_StrSlice ac_str_slice_clone(Ac_StrSlice slice);
 
 /// Get a slice from a string in a specific range. This does not copy or clone the chars in the
 /// range.
-ACLIBDEF Al_StrSlice al_str_slice_range(Al_String str, size_t start, size_t end);
+ACLIBDEF Ac_StrSlice ac_str_slice_range(Ac_String str, size_t start, size_t end);
 
 /// Free a string slice and its memory. This should *only* be called if the slice owns its own
 /// characters
-ACLIBDEF void al_str_slice_free(Al_StrSlice* slice);
+ACLIBDEF void ac_str_slice_free(Ac_StrSlice* slice);
 
 /// Allocates a new string with a specific capacity. The caller is responsible for freeing the
-/// string with `al_str_free()`
-ACLIBDEF Al_String al_str_with_capacity(size_t capacity);
+/// string with `ac_str_free()`
+ACLIBDEF Ac_String ac_str_with_capacity(size_t capacity);
 
 /// Create a new string from a cstr. This will clone the contents of the cstr.
-/// The caller is responsible for freeing the new string with `al_str_free()`
-ACLIBDEF Al_String al_str_from(char* chs);
+/// The caller is responsible for freeing the new string with `ac_str_free()`
+ACLIBDEF Ac_String ac_str_from(char* chs);
 
 /// Push a char unto the end of a string
-ACLIBDEF void al_str_push(Al_String* str, char ch);
+ACLIBDEF void ac_str_push(Ac_String* str, char ch);
 
 /// Adds a char to the start of a string
-ACLIBDEF void al_str_unshift(Al_String* str, char ch);
+ACLIBDEF void ac_str_unshift(Ac_String* str, char ch);
 
 /// Append a cstr unto the end of a string
-ACLIBDEF void al_str_append(Al_String* str, char* chs);
+ACLIBDEF void ac_str_append(Ac_String* str, char* chs);
 
 /// Append a formatted cstr unto the end of a string
-ACLIBDEF void al_str_appendf(Al_String* str, const char* fmt, ...);
+ACLIBDEF void ac_str_appendf(Ac_String* str, const char* fmt, ...);
 
 /// Prepend a cstr to the front of a string
-ACLIBDEF void al_str_prepend(Al_String* str, char* chs);
+ACLIBDEF void ac_str_prepend(Ac_String* str, char* chs);
 
 /// Prepend a formatted cstr to the front of a string
-ACLIBDEF void al_str_prependf(Al_String* str, const char* fmt, ...);
+ACLIBDEF void ac_str_prependf(Ac_String* str, const char* fmt, ...);
 
 /// Pop and return the last char of a string.
 /// This asserts that the string has a char that can be popped
-ACLIBDEF char al_str_pop(Al_String* str);
+ACLIBDEF char ac_str_pop(Ac_String* str);
 
 /// Remove and return the first char of a string.
 /// This asserts that the string has a char that can be popped
-ACLIBDEF char al_str_shift(Al_String* str);
+ACLIBDEF char ac_str_shift(Ac_String* str);
 
 /// Clone the chars behind a string, and return them as an owned string slice.
 /// The caller is responsible for freeing the allocated cstr
-ACLIBDEF char* al_str_clone_chars(Al_String str);
+ACLIBDEF char* ac_str_clone_chars(Ac_String str);
 
 /// Puts all the contents of a string into a slice, removing all of the contents of the original
 /// string.
 /// The slice is now the owner of the memory.
-/// The caller is responsible for freeing the string slice with `al_str_slice_free()`
-ACLIBDEF Al_StrSlice al_str_drain(Al_String* str);
+/// The caller is responsible for freeing the string slice with `ac_str_slice_free()`
+ACLIBDEF Ac_StrSlice ac_str_drain(Ac_String* str);
 
 /// Puts all the contents of a string in a given range into a slice, removing the elements from the
 /// original string. The slice is now the owner of the removed memory. The caller is responsible for
-/// freeing the string slice with `al_str_slice_free()`
-ACLIBDEF Al_StrSlice al_str_drain_range(Al_String* str, size_t start, size_t end);
+/// freeing the string slice with `ac_str_slice_free()`
+ACLIBDEF Ac_StrSlice ac_str_drain_range(Ac_String* str, size_t start, size_t end);
 
 /// Remove a char at a given index from a string
-ACLIBDEF void al_str_remove(Al_String* str, size_t idx);
+ACLIBDEF void ac_str_remove(Ac_String* str, size_t idx);
 
 /// Remove a set of chars in a given range, from a string
-ACLIBDEF void al_str_remove_range(Al_String* str, size_t start, size_t end);
+ACLIBDEF void ac_str_remove_range(Ac_String* str, size_t start, size_t end);
 
 /// Empty the given string. This does not free or remove any memory
-ACLIBDEF void al_str_empty(Al_String* str);
+ACLIBDEF void ac_str_empty(Ac_String* str);
 
 /// Free the given vector and its contents
-ACLIBDEF void al_str_free(Al_String* str);
+ACLIBDEF void ac_str_free(Ac_String* str);
 
 /// Ensure that a string has atleast the given capacity.
-ACLIBDEF void al_str_ensure_cap(Al_String* str, size_t new_cap);
+ACLIBDEF void ac_str_ensure_cap(Ac_String* str, size_t new_cap);
 
 /// Trim all whitespace from the front of a string
-ACLIBDEF void al_str_trim_front(Al_String* str);
+ACLIBDEF void ac_str_trim_front(Ac_String* str);
 
 /// Trim all whitespace from the back of the string
-ACLIBDEF void al_str_trim_back(Al_String* str);
+ACLIBDEF void ac_str_trim_back(Ac_String* str);
 
 /// Trim all whitespace from the front and back of a string
-ACLIBDEF void al_str_trim(Al_String* str);
+ACLIBDEF void ac_str_trim(Ac_String* str);
 
 /// Split a string by a delimeter
-ACLIBDEF Al_StrVec al_str_split_by(Al_String str, char delim);
+ACLIBDEF Ac_StrVec ac_str_split_by(Ac_String str, char delim);
 
 /// Split a string by a set of delimeters
-ACLIBDEF Al_StrVec al_str_split_by_many(Al_String str, char* delims);
+ACLIBDEF Ac_StrVec ac_str_split_by_many(Ac_String str, char* delims);
 
 /// Split a string by a delimeter once
-ACLIBDEF Al_StrVec al_str_split_by_once(Al_String str, char delim);
+ACLIBDEF Ac_StrVec ac_str_split_by_once(Ac_String str, char delim);
 
 /// Split a string at an index
-ACLIBDEF Al_StrVec al_str_split_at(Al_String str, size_t idx);
+ACLIBDEF Ac_StrVec ac_str_split_at(Ac_String str, size_t idx);
 
 /// Reads a file into a string buffer, and returns the amount of bytes read.
-ACLIBDEF size_t al_str_read_file(Al_String* buffer, FILE* file);
+ACLIBDEF size_t ac_str_read_file(Ac_String* buffer, FILE* file);
 
 // Reads all the lines in a file into a line buffer, and returns the amount of bytes read.
-ACLIBDEF size_t al_str_read_lines(Al_StrVec* linebuffer, FILE* file);
+ACLIBDEF size_t ac_str_read_lines(Ac_StrVec* linebuffer, FILE* file);
 
 /* END OF STRING DECL */
 
@@ -583,33 +583,33 @@ ACLIBDEF size_t al_str_read_lines(Al_StrVec* linebuffer, FILE* file);
 //  -
 //
 // FUNCTIONS AND MACROS:
-//  - al_ascii_is_alphabetic(ch)
-//  - al_ascii_is_numeric(ch)
-//  - al_ascii_is_alphanumeric(ch)
-//  - al_ascii_is_whitespace(ch)
-//  - al_ascii_is_uppercase(ch)
-//  - al_ascii_is_lowercase(ch)
-//  - al_ascii_to_uppercase(ch)
-//  - al_ascii_to_lowercase(ch)
+//  - ac_ascii_is_alphabetic(ch)
+//  - ac_ascii_is_numeric(ch)
+//  - ac_ascii_is_alphanumeric(ch)
+//  - ac_ascii_is_whitespace(ch)
+//  - ac_ascii_is_uppercase(ch)
+//  - ac_ascii_is_lowercase(ch)
+//  - ac_ascii_to_uppercase(ch)
+//  - ac_ascii_to_lowercase(ch)
 //
 // USAGE:
 
 /// Checks if an ascii char is alphabetic, i.e. [a-zA-Z]
-char al_ascii_is_alphabetic(char ch);
+char ac_ascii_is_alphabetic(char ch);
 /// Checks if an ascii char is numeric, i.e. [0-9]
-bool al_ascii_is_numeric(char ch);
+bool ac_ascii_is_numeric(char ch);
 /// Checks if an ascii char is alphanumeric, i.e. [a-zA-Z0-9]
-bool al_ascii_is_alphanumeric(char ch);
+bool ac_ascii_is_alphanumeric(char ch);
 /// Checks if an ascii char is whitespace, e.g. '\n', '\t', ' '
-bool al_ascii_is_whitespace(char ch);
+bool ac_ascii_is_whitespace(char ch);
 /// Checks if an ascii char is uppercase
-bool al_ascii_is_uppercase(char ch);
+bool ac_ascii_is_uppercase(char ch);
 /// Checks if an ascii char is lowercase
-bool al_ascii_is_lowercase(char ch);
+bool ac_ascii_is_lowercase(char ch);
 /// Returns the uppercase version of an ascii char
-char al_ascii_to_uppercase(char ch);
+char ac_ascii_to_uppercase(char ch);
 /// Returns the lowercase version of an ascii char
-char al_ascii_to_lowercase(char ch);
+char ac_ascii_to_lowercase(char ch);
 
 /* END OF ASCII DECL */
 
@@ -626,17 +626,17 @@ char al_ascii_to_lowercase(char ch);
 //  -
 //
 // TYPES AND TYPE MACROS:
-//  - Al_LogLevel
+//  - Ac_LogLevel
 //
 // FUNCTIONS AND MACROS:
-//  - al_log(loglvl, fmt, ...)
-//  - al_todo(msg)
+//  - ac_log(loglvl, fmt, ...)
+//  - ac_todo(msg)
 //
 // USAGE:
 
 #ifndef ACLIB_LOG_FN
-/// Sets the function that `al_log` will write to. The function must have the signature
-/// `void (Al_LogLevel loglvl, const char* fmt, ...)`
+/// Sets the function that `ac_log` will write to. The function must have the signature
+/// `void (Ac_LogLevel loglvl, const char* fmt, ...)`
 #define ACLIB_LOG_FN __aclib_default_log_fn
 #endif
 
@@ -651,8 +651,8 @@ char al_ascii_to_lowercase(char ch);
 /// The ansi code for clearing all styles
 #define _ACLIB_CLEAR "\x1b[0m"
 
-/// The loglevel used by al_log()
-typedef enum Al_LogLevel
+/// The loglevel used by ac_log()
+typedef enum Ac_LogLevel
 {
     ACLIB_DEBUG,
     ACLIB_INFO,
@@ -660,22 +660,22 @@ typedef enum Al_LogLevel
     ACLIB_SUCCESS,
     ACLIB_ERR,
     ACLIB_NO_LOGS,
-} Al_LogLevel;
+} Ac_LogLevel;
 
-/// The current minimun log level for `al_log`
-extern Al_LogLevel aclib_log_level;
+/// The current minimun log level for `ac_log`
+extern Ac_LogLevel aclib_log_level;
 /// the file descriptor that aclibs logging default implementation will write to
 extern FILE* aclib_log_fd;
-/// Sets the function that `al_log` will write to. The function must have the signature
-/// `void (Al_LogLevel loglvl, const char* fmt, ...)`
-extern void (*aclib_log_fn_ptr)(Al_LogLevel, const char*, ...);
+/// Sets the function that `ac_log` will write to. The function must have the signature
+/// `void (Ac_LogLevel loglvl, const char* fmt, ...)`
+extern void (*aclib_log_fn_ptr)(Ac_LogLevel, const char*, ...);
 
 /// The default logging function for aclib
-ACLIBDEF void __aclib_default_log_fn(Al_LogLevel loglvl, const char* fmt, ...);
+ACLIBDEF void __aclib_default_log_fn(Ac_LogLevel loglvl, const char* fmt, ...);
 /// Print a log messae
-#define al_log (aclib_log_fd = (!aclib_log_fd) ? stderr : aclib_log_fd, *aclib_log_fn_ptr)
+#define ac_log (aclib_log_fd = (!aclib_log_fd) ? stderr : aclib_log_fd, *aclib_log_fn_ptr)
 
-#define al_todo(msg) (al_log(ACLIB_ERR, "%s:%d: TODO: %s\n", __FILE__, __LINE__, (msg)), abort())
+#define ac_todo(msg) (ac_log(ACLIB_ERR, "%s:%d: TODO: %s\n", __FILE__, __LINE__, (msg)), abort())
 
 /* END OF LOGGING DECL */
 
@@ -691,37 +691,37 @@ ACLIBDEF void __aclib_default_log_fn(Al_LogLevel loglvl, const char* fmt, ...);
 //  -
 //
 // TYPES AND TYPE MACROS:
-//  - Al_ResTag
-//  - Al_ResDef(T, E)
+//  - Ac_ResTag
+//  - Ac_ResDef(T, E)
 //
 // FUNCTIONS AND MACROS:
-//  - al_res_ok(val)
-//  - al_res_err(val)
-//  - al_res_try(res)
-//  - al_res_unwrap(res)
-//  - al_res_unwrap_err(res)
-//  - al_res_unwrap_or(res, or)
-//  - al_res_unwrap_or_else(res, or_fn)
-//  - al_res_map(T, res, fn)
-//  - al_res_map_err(T, res, fn)
+//  - ac_res_ok(val)
+//  - ac_res_err(val)
+//  - ac_res_try(res)
+//  - ac_res_unwrap(res)
+//  - ac_res_unwrap_err(res)
+//  - ac_res_unwrap_or(res, or)
+//  - ac_res_unwrap_or_else(res, or_fn)
+//  - ac_res_map(T, res, fn)
+//  - ac_res_map_err(T, res, fn)
 //
 // USAGE:
 
-/// The tag behind the Al_Result
+/// The tag behind the Ac_Result
 typedef enum
 {
-    AL_RES_OK,
-    AL_RES_ERR,
-} Al_ResTag;
+    AC_RES_OK,
+    AC_RES_ERR,
+} Ac_ResTag;
 
 /// Define a new Result type with an ok type (T) and an err type (E)
-#define Al_ResDef(T, E)                                                               \
+#define Ac_ResDef(T, E)                                                               \
     struct                                                                            \
     {                                                                                 \
         /* The tag of this result. Determines what kind of value this object holds */ \
-        /* AL_RES_OK => res.ok */                                                     \
-        /* AL_RES_ERR => res.err */                                                   \
-        Al_ResTag tag;                                                                \
+        /* AC_RES_OK => res.ok */                                                     \
+        /* AC_RES_ERR => res.err */                                                   \
+        Ac_ResTag tag;                                                                \
         union                                                                         \
         {                                                                             \
             T ok;                                                                     \
@@ -731,39 +731,39 @@ typedef enum
 
 
 /// Construct a new Result value, set to ok, and with a given value
-#define al_res_ok(val) {.tag = AL_RES_OK, .ok = (val)}
+#define ac_res_ok(val) {.tag = AC_RES_OK, .ok = (val)}
 
 /// Construct a new Result value, set to err, and with a given error value
-#define al_res_err(err_val) {.tag = AL_RES_ERR, .err = (err_val)}
+#define ac_res_err(err_val) {.tag = AC_RES_ERR, .err = (err_val)}
 
 /// Unwrap a result, or return the error
-#define al_res_try(T, res) \
-    ((res).tag == AL_RES_OK ? (res).ok : (({ return (T)al_res_err((res).err); }), 0))
+#define ac_res_try(T, res) \
+    ((res).tag == AC_RES_OK ? (res).ok : (({ return (T)ac_res_err((res).err); }), 0))
 
 /// Unwrap a result ok value. Asserts that the result has the ok tag
-#define al_res_unwrap(res)                                                                        \
-    (ACLIB_ASSERT_FN((res).tag == AL_RES_OK && "Tried to unwrap result, but got tag AL_RES_ERR"), \
+#define ac_res_unwrap(res)                                                                        \
+    (ACLIB_ASSERT_FN((res).tag == AC_RES_OK && "Tried to unwrap result, but got tag AC_RES_ERR"), \
      res.ok)
 
 /// Unwrap a result error value. Asserts that the result has the err tag
-#define al_res_unwrap_err(res)                                               \
-    (ACLIB_ASSERT_FN((res).tag == AL_RES_ERR &&                              \
-                     "Tried to unwrap result error, but got tag AL_RES_OK"), \
+#define ac_res_unwrap_err(res)                                               \
+    (ACLIB_ASSERT_FN((res).tag == AC_RES_ERR &&                              \
+                     "Tried to unwrap result error, but got tag AC_RES_OK"), \
      res.ok)
 
 /// Unwrap a result ok value, or give the given or value
-#define al_res_unwrap_or(res, or) ((res).tag == AL_RES_OK ? (res).ok : (or))
+#define ac_res_unwrap_or(res, or) ((res).tag == AC_RES_OK ? (res).ok : (or))
 
 /// Unwrap a result ok value, or give a value, returned from the ok_fn function
-#define al_res_unwrap_or_else(res, or_fn) ((res).tag == AL_RES_OK ? (res).tag : (or_fn)())
+#define ac_res_unwrap_or_else(res, or_fn) ((res).tag == AC_RES_OK ? (res).tag : (or_fn)())
 
 /// Run a function on an results ok value, or give the error
-#define al_res_map(T, res, fn) \
-    ((res).tag == AL_RES_OK ? (T)al_res_ok((fn)((res).ok)) : (T)al_res_err((res).err))
+#define ac_res_map(T, res, fn) \
+    ((res).tag == AC_RES_OK ? (T)ac_res_ok((fn)((res).ok)) : (T)ac_res_err((res).err))
 
 /// Run a function on an results err value, or give the ok valie
-#define al_res_map_err(T, res, fn) \
-    ((res).tag == AL_RES_ERR ? (T)al_res_err((fn)((res).err)) : (T)al_res_ok((res).ok))
+#define ac_res_map_err(T, res, fn) \
+    ((res).tag == AC_RES_ERR ? (T)ac_res_err((fn)((res).err)) : (T)ac_res_ok((res).ok))
 
 
 /* END OF RESULT DECL */
@@ -796,76 +796,76 @@ ACLIBDEF void* __aclib_clone_arr(void* ptr, size_t size)
  *  STRING IMPLEMENTATION  *
  *                         */
 
-ACLIBDEF Al_StrSlice al_str_slice_with_len(size_t len)
+ACLIBDEF Ac_StrSlice ac_str_slice_with_len(size_t len)
 {
-    return (Al_StrSlice){
+    return (Ac_StrSlice){
         .chars = (char*)ACLIB_CALLOC_FN(len + 1, sizeof(char)),
         .len = len,
     };
 }
 
-ACLIBDEF Al_StrSlice al_str_slice_from(char* chs)
+ACLIBDEF Ac_StrSlice ac_str_slice_from(char* chs)
 {
-    return (Al_StrSlice){
+    return (Ac_StrSlice){
         .chars = chs,
         .len = strlen(chs),
     };
 }
 
-ACLIBDEF Al_StrSlice al_str_owned_slice(Al_String str)
+ACLIBDEF Ac_StrSlice ac_str_owned_slice(Ac_String str)
 {
     if (str.cap == 0)
-        return (Al_StrSlice){0};
+        return (Ac_StrSlice){0};
 
-    char* buffer = al_str_clone_chars(str);
-    return al_str_slice_from(buffer);
+    char* buffer = ac_str_clone_chars(str);
+    return ac_str_slice_from(buffer);
 }
 
-ACLIBDEF Al_StrSlice al_str_slice_clone(Al_StrSlice slice)
+ACLIBDEF Ac_StrSlice ac_str_slice_clone(Ac_StrSlice slice)
 {
     char* chars = (char*)ACLIB_MALLOC_FN((slice.len + 1) * sizeof(char));
     memcpy(chars, slice.chars, slice.len * sizeof(char));
 
     chars[slice.len] = '\0';
-    return (Al_StrSlice){.chars = chars, .len = slice.len};
+    return (Ac_StrSlice){.chars = chars, .len = slice.len};
 }
 
-ACLIBDEF Al_StrSlice al_str_slice_range(Al_String str, size_t start, size_t end)
+ACLIBDEF Ac_StrSlice ac_str_slice_range(Ac_String str, size_t start, size_t end)
 {
     if (start >= str.len || end > str.len || start >= end)
-        return (Al_StrSlice){0};
+        return (Ac_StrSlice){0};
 
-    return (Al_StrSlice){
+    return (Ac_StrSlice){
         .chars = str.chars + start,
         .len = end - start,
     };
 }
 
-ACLIBDEF void al_str_slice_free(Al_StrSlice* slice)
+ACLIBDEF void ac_str_slice_free(Ac_StrSlice* slice)
 {
     free(slice->chars);
     slice->len = 0;
 }
 
-ACLIBDEF Al_String al_str_with_capacity(size_t capacity)
+ACLIBDEF Ac_String ac_str_with_capacity(size_t capacity)
 {
-    return (Al_String){
+    return (Ac_String){
         .chars = (char*)ACLIB_CALLOC_FN(capacity + 1, sizeof(char)),
         .len = 0,
         .cap = capacity,
     };
 }
 
-ACLIBDEF Al_String al_str_from(char* chs)
+ACLIBDEF Ac_String ac_str_from(char* chs)
 {
-    Al_String str = {0};
-    al_str_append(&str, chs);
+    Ac_String str = {0};
+    ac_str_append(&str, chs);
     return str;
 }
 
-ACLIBDEF void al_str_push(Al_String* str, char ch)
+ACLIBDEF void ac_str_push(Ac_String* str, char ch)
 {
-    al_str_ensure_cap(str, str->len + 1);
+    ac_str_ensure_cap(str, str->len + 1);
 
     str->chars[str->len] = ch;
     str->chars[str->len + 1] = '\0';
@@ -878,19 +878,19 @@ ACLIBDEF void al_str_push(Al_String* str, char ch)
 // 'NNUMBER: 4'
 // '[NUMBER: 4'
 
-ACLIBDEF void al_str_unshift(Al_String* str, char ch)
+ACLIBDEF void ac_str_unshift(Ac_String* str, char ch)
 {
-    al_str_ensure_cap(str, str->len + 1);
+    ac_str_ensure_cap(str, str->len + 1);
     memmove(str->chars + 1, str->chars, str->len * sizeof(char));
     str->chars[0] = ch;
     str->len += 1;
     str->chars[str->len] = '\0';
 }
 
-ACLIBDEF void al_str_append(Al_String* str, char* chs)
+ACLIBDEF void ac_str_append(Ac_String* str, char* chs)
 {
     size_t size = strlen(chs);
-    al_str_ensure_cap(str, str->len + size);
+    ac_str_ensure_cap(str, str->len + size);
 
     for (size_t i = 0; i < size; i++)
         str->chars[str->len + i] = chs[i];
@@ -899,14 +899,14 @@ ACLIBDEF void al_str_append(Al_String* str, char* chs)
     str->len += size;
 }
 
-ACLIBDEF void al_str_appendf(Al_String* str, const char* fmt, ...)
+ACLIBDEF void ac_str_appendf(Ac_String* str, const char* fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
     size_t needed = vsnprintf(NULL, 0, fmt, args) + 1;
     va_end(args);
 
-    al_str_ensure_cap(str, str->len + needed);
+    ac_str_ensure_cap(str, str->len + needed);
 
     char* dest = str->chars + str->len;
     va_start(args, fmt);
@@ -917,10 +917,10 @@ ACLIBDEF void al_str_appendf(Al_String* str, const char* fmt, ...)
     str->len += needed - 1;
 }
 
-ACLIBDEF void al_str_prepend(Al_String* str, char* chs)
+ACLIBDEF void ac_str_prepend(Ac_String* str, char* chs)
 {
     size_t size = strlen(chs);
-    al_str_ensure_cap(str, str->len + size);
+    ac_str_ensure_cap(str, str->len + size);
 
     memcpy(str->chars + size, str->chars, str->len * sizeof(char));
     memcpy(str->chars, chs, size * sizeof(char));
@@ -929,31 +929,31 @@ ACLIBDEF void al_str_prepend(Al_String* str, char* chs)
     str->len += size;
 }
 
-ACLIBDEF void al_str_prependf(Al_String* str, const char* fmt, ...)
+ACLIBDEF void ac_str_prependf(Ac_String* str, const char* fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
     size_t needed = vsnprintf(NULL, 0, fmt, args) + 1;
     va_end(args);
 
-    al_str_ensure_cap(str, str->len + needed);
+    ac_str_ensure_cap(str, str->len + needed);
 
     memcpy(str->chars + needed - 1, str->chars, str->len * sizeof(char));
 
-    Al_StrSlice format_buf = al_str_slice_with_len(needed - 1);
+    Ac_StrSlice format_buf = ac_str_slice_with_len(needed - 1);
     va_start(args, fmt);
     vsprintf(format_buf.chars, fmt, args);
     va_end(args);
 
     memcpy(str->chars, format_buf.chars, format_buf.len * sizeof(char));
 
-    al_str_slice_free(&format_buf);
+    ac_str_slice_free(&format_buf);
 
     // sprintf automatically adds '\0', so take account for it
     str->len += needed - 1;
 }
 
-ACLIBDEF char al_str_pop(Al_String* str)
+ACLIBDEF char ac_str_pop(Ac_String* str)
 {
     ACLIB_ASSERT_FN(str->len >= 1 &&
                     "String failed to pop, expected length of >= 1, but got length of 0");
@@ -961,7 +961,7 @@ ACLIBDEF char al_str_pop(Al_String* str)
     return str->chars[str->len];
 }
 
-ACLIBDEF char al_str_shift(Al_String* str)
+ACLIBDEF char ac_str_shift(Ac_String* str)
 {
     ACLIB_ASSERT_FN(str->len >= 1 &&
                     "String failed to shift, expected length of >= 1, but got length of 0");
@@ -974,13 +974,13 @@ ACLIBDEF char al_str_shift(Al_String* str)
     return shifted;
 }
 
-ACLIBDEF char* al_str_clone_chars(Al_String str)
+ACLIBDEF char* ac_str_clone_chars(Ac_String str)
 {
     char* buffer = (char*)malloc((str.len + 1) * sizeof(char));
 
     if (buffer == NULL)
     {
-        al_log(ACLIB_ERR, "Failed to clone string chars\n");
+        ac_log(ACLIB_ERR, "Failed to clone string chars\n");
         exit(EXIT_FAILURE);
     }
 
@@ -990,34 +990,34 @@ ACLIBDEF char* al_str_clone_chars(Al_String str)
     return buffer;
 }
 
-ACLIBDEF Al_StrSlice al_str_drain(Al_String* str)
+ACLIBDEF Ac_StrSlice ac_str_drain(Ac_String* str)
 {
-    Al_StrSlice slice = al_str_slice_from(str->chars);
+    Ac_StrSlice slice = ac_str_slice_from(str->chars);
 
-    *str = (Al_String){0};
+    *str = (Ac_String){0};
 
     return slice;
 }
 
-ACLIBDEF Al_StrSlice al_str_drain_range(Al_String* str, size_t start, size_t end)
+ACLIBDEF Ac_StrSlice ac_str_drain_range(Ac_String* str, size_t start, size_t end)
 {
-    Al_StrSlice slice = al_str_slice_range(*str, start, end);
-    slice = al_str_slice_clone(slice);
+    Ac_StrSlice slice = ac_str_slice_range(*str, start, end);
+    slice = ac_str_slice_clone(slice);
 
-    al_str_remove_range(str, start, end);
+    ac_str_remove_range(str, start, end);
 
     return slice;
 }
 
-ACLIBDEF void al_str_remove(Al_String* str, size_t idx)
+ACLIBDEF void ac_str_remove(Ac_String* str, size_t idx)
 {
     if (idx >= str->len)
         return;
 
-    al_str_remove_range(str, idx, idx + 1);
+    ac_str_remove_range(str, idx, idx + 1);
 }
 
-ACLIBDEF void al_str_remove_range(Al_String* str, size_t start, size_t end)
+ACLIBDEF void ac_str_remove_range(Ac_String* str, size_t start, size_t end)
 {
     if (start >= str->len || end > str->len || start >= end)
         return;
@@ -1034,14 +1034,14 @@ ACLIBDEF void al_str_remove_range(Al_String* str, size_t start, size_t end)
     str->chars[str->len] = '\0';
 }
 
-ACLIBDEF void al_str_empty(Al_String* str)
+ACLIBDEF void ac_str_empty(Ac_String* str)
 {
     str->len = 0;
     if (str->chars)
         str->chars[0] = '\0';
 }
 
-ACLIBDEF void al_str_free(Al_String* str)
+ACLIBDEF void ac_str_free(Ac_String* str)
 {
     if (str->chars == NULL)
         return;
@@ -1052,7 +1052,7 @@ ACLIBDEF void al_str_free(Al_String* str)
     str->cap = 0;
 }
 
-ACLIBDEF void al_str_ensure_cap(Al_String* str, size_t new_cap)
+ACLIBDEF void ac_str_ensure_cap(Ac_String* str, size_t new_cap)
 {
     if (str->cap < new_cap + 1)
     {
@@ -1063,7 +1063,7 @@ ACLIBDEF void al_str_ensure_cap(Al_String* str, size_t new_cap)
 
         if (str->chars == NULL)
         {
-            al_log(ACLIB_ERR, "Failed to reallocate string\n");
+            ac_log(ACLIB_ERR, "Failed to reallocate string\n");
             exit(EXIT_FAILURE);
         }
 
@@ -1072,120 +1072,120 @@ ACLIBDEF void al_str_ensure_cap(Al_String* str, size_t new_cap)
 }
 
 
-#define INTERNAL_BUF_SIZE 256
-ACLIBDEF size_t al_str_read_file(Al_String* buffer, FILE* file)
+#define INTERNAC_BUF_SIZE 256
+ACLIBDEF size_t ac_str_read_file(Ac_String* buffer, FILE* file)
 {
     size_t bytes_read = 0;
-    char char_buf[INTERNAL_BUF_SIZE];
-    while (fgets(char_buf, INTERNAL_BUF_SIZE, file))
+    char char_buf[INTERNAC_BUF_SIZE];
+    while (fgets(char_buf, INTERNAC_BUF_SIZE, file))
     {
         bytes_read += strlen(char_buf);
-        al_str_append(buffer, char_buf);
+        ac_str_append(buffer, char_buf);
     }
 
     return bytes_read;
 }
 
-ACLIBDEF size_t al_str_read_lines(Al_StrVec* linebuffer, FILE* file)
+ACLIBDEF size_t ac_str_read_lines(Ac_StrVec* linebuffer, FILE* file)
 {
     size_t bytes_read = 0;
 
-    char char_buf[INTERNAL_BUF_SIZE];
-    while (fgets(char_buf, INTERNAL_BUF_SIZE, file))
+    char char_buf[INTERNAC_BUF_SIZE];
+    while (fgets(char_buf, INTERNAC_BUF_SIZE, file))
     {
         bytes_read += strlen(char_buf);
 
-        Al_String line = al_str_from(char_buf);
+        Ac_String line = ac_str_from(char_buf);
         size_t old_size = strlen(char_buf);
         while (char_buf[strlen(char_buf) - 1] != '\n')
         {
-            fgets(char_buf, INTERNAL_BUF_SIZE, file);
+            fgets(char_buf, INTERNAC_BUF_SIZE, file);
             if (strlen(char_buf) == old_size)
                 break;
-            al_str_append(&line, char_buf);
+            ac_str_append(&line, char_buf);
         }
 
         // pop the '\n'
         if (line.chars[line.len - 1] == '\n')
-            al_str_pop(&line);
+            ac_str_pop(&line);
 
-        al_vec_push(linebuffer, al_str_owned_slice(line));
-        al_str_free(&line);
+        ac_vec_push(linebuffer, ac_str_owned_slice(line));
+        ac_str_free(&line);
     }
 
     return bytes_read;
 }
-#undef INTERNAL_BUF_SIZE
+#undef INTERNAC_BUF_SIZE
 
-ACLIBDEF void al_str_trim_front(Al_String* str)
+ACLIBDEF void ac_str_trim_front(Ac_String* str)
 {
     if (str->len == 0)
         return;
 
     size_t end = 0;
-    while (end < str->len && al_ascii_is_whitespace(str->chars[end]))
+    while (end < str->len && ac_ascii_is_whitespace(str->chars[end]))
         end++;
 
-    al_str_remove_range(str, 0, end);
+    ac_str_remove_range(str, 0, end);
 }
 
 /// Trim all whitespace from the back of the string
-ACLIBDEF void al_str_trim_back(Al_String* str)
+ACLIBDEF void ac_str_trim_back(Ac_String* str)
 {
     if (str->len == 0)
         return;
 
     size_t start = str->len;
-    while (start > 0 && al_ascii_is_whitespace(str->chars[start - 1]))
+    while (start > 0 && ac_ascii_is_whitespace(str->chars[start - 1]))
         start--;
 
-    al_str_remove_range(str, start, str->len);
+    ac_str_remove_range(str, start, str->len);
 }
 
 /// Trim all whitespace from the front and back of a string
-ACLIBDEF void al_str_trim(Al_String* str)
+ACLIBDEF void ac_str_trim(Ac_String* str)
 {
-    al_str_trim_back(str);
-    al_str_trim_front(str);
+    ac_str_trim_back(str);
+    ac_str_trim_front(str);
 }
 
 /// Split a string by a delimeter
-ACLIBDEF Al_StrVec al_str_split_by(Al_String str, char delim)
+ACLIBDEF Ac_StrVec ac_str_split_by(Ac_String str, char delim)
 {
     size_t start = 0;
     size_t end = 0;
 
-    Al_StrVec parts = {0};
+    Ac_StrVec parts = {0};
 
     while (end <= str.len)
     {
         if (str.chars[end] == delim)
         {
-            Al_StrSlice slice = al_str_slice_range(str, start, end);
-            slice = al_str_slice_clone(slice);
+            Ac_StrSlice slice = ac_str_slice_range(str, start, end);
+            slice = ac_str_slice_clone(slice);
 
-            al_vec_push(&parts, slice);
+            ac_vec_push(&parts, slice);
             end++;
             start = end;
         }
         end++;
     }
 
-    Al_StrSlice slice = al_str_slice_range(str, start, str.len);
-    slice = al_str_slice_clone(slice);
+    Ac_StrSlice slice = ac_str_slice_range(str, start, str.len);
+    slice = ac_str_slice_clone(slice);
 
-    al_vec_push(&parts, slice);
+    ac_vec_push(&parts, slice);
 
     return parts;
 }
 
 /// Split a string by a set of delimeters
-ACLIBDEF Al_StrVec al_str_split_by_many(Al_String str, char* delims)
+ACLIBDEF Ac_StrVec ac_str_split_by_many(Ac_String str, char* delims)
 {
     size_t start = 0;
     size_t end = 0;
 
-    Al_StrVec parts = {0};
+    Ac_StrVec parts = {0};
 
     while (end < str.len)
     {
@@ -1201,69 +1201,69 @@ ACLIBDEF Al_StrVec al_str_split_by_many(Al_String str, char* delims)
 
         if (is_delim)
         {
-            Al_StrSlice slice = al_str_slice_range(str, start, end);
-            slice = al_str_slice_clone(slice);
+            Ac_StrSlice slice = ac_str_slice_range(str, start, end);
+            slice = ac_str_slice_clone(slice);
 
-            al_vec_push(&parts, slice);
+            ac_vec_push(&parts, slice);
             end++;
             start = end;
         }
         end++;
     }
 
-    Al_StrSlice slice = al_str_slice_range(str, start, str.len);
-    slice = al_str_slice_clone(slice);
+    Ac_StrSlice slice = ac_str_slice_range(str, start, str.len);
+    slice = ac_str_slice_clone(slice);
 
-    al_vec_push(&parts, slice);
+    ac_vec_push(&parts, slice);
 
     return parts;
 }
 
 /// Split a string by a delimeter once
-ACLIBDEF Al_StrVec al_str_split_by_once(Al_String str, char delim)
+ACLIBDEF Ac_StrVec ac_str_split_by_once(Ac_String str, char delim)
 {
     size_t end = 0;
 
-    Al_StrVec parts = {0};
+    Ac_StrVec parts = {0};
 
     while (end < str.len)
     {
         if (str.chars[end] == delim)
         {
-            Al_StrSlice slice = al_str_slice_range(str, 0, end);
-            slice = al_str_slice_clone(slice);
+            Ac_StrSlice slice = ac_str_slice_range(str, 0, end);
+            slice = ac_str_slice_clone(slice);
 
-            al_vec_push(&parts, slice);
+            ac_vec_push(&parts, slice);
             break;
         }
         end++;
     }
 
-    Al_StrSlice rest = al_str_slice_range(str, end + 1, str.len);
-    rest = al_str_slice_clone(rest);
-    al_vec_push(&parts, rest);
+    Ac_StrSlice rest = ac_str_slice_range(str, end + 1, str.len);
+    rest = ac_str_slice_clone(rest);
+    ac_vec_push(&parts, rest);
 
     return parts;
 }
 
 /// Split a string at an index
-ACLIBDEF Al_StrVec al_str_split_at(Al_String str, size_t idx)
+ACLIBDEF Ac_StrVec ac_str_split_at(Ac_String str, size_t idx)
 {
-    Al_StrVec parts = {0};
+    Ac_StrVec parts = {0};
 
     if (idx >= str.len)
     {
-        al_vec_push(&parts, al_str_owned_slice(str));
+        ac_vec_push(&parts, ac_str_owned_slice(str));
         return parts;
     }
 
-    Al_StrSlice first_part = al_str_slice_range(str, 0, idx);
-    first_part = al_str_slice_clone(first_part);
-    al_vec_push(&parts, first_part);
+    Ac_StrSlice first_part = ac_str_slice_range(str, 0, idx);
+    first_part = ac_str_slice_clone(first_part);
+    ac_vec_push(&parts, first_part);
 
-    Al_StrSlice second_part = al_str_slice_range(str, idx, str.len);
-    second_part = al_str_slice_clone(second_part);
-    al_vec_push(&parts, second_part);
+    Ac_StrSlice second_part = ac_str_slice_range(str, idx, str.len);
+    second_part = ac_str_slice_clone(second_part);
+    ac_vec_push(&parts, second_part);
 
     return parts;
 }
@@ -1276,48 +1276,48 @@ ACLIBDEF Al_StrVec al_str_split_at(Al_String str, size_t idx)
  *  ASCII IMPLEMENTATION  *
  *                        */
 
-char al_ascii_is_alphabetic(char ch)
+char ac_ascii_is_alphabetic(char ch)
 {
     return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z');
 }
 
-bool al_ascii_is_numeric(char ch)
+bool ac_ascii_is_numeric(char ch)
 {
     return ch >= '0' && ch <= '9';
 }
 
-bool al_ascii_is_alphanumeric(char ch)
+bool ac_ascii_is_alphanumeric(char ch)
 {
-    return al_ascii_is_alphabetic(ch) || al_ascii_is_numeric(ch);
+    return ac_ascii_is_alphabetic(ch) || ac_ascii_is_numeric(ch);
 }
 
-bool al_ascii_is_whitespace(char ch)
+bool ac_ascii_is_whitespace(char ch)
 {
     return ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' || ch == '\v' || ch == '\f';
 }
 
-bool al_ascii_is_uppercase(char ch)
+bool ac_ascii_is_uppercase(char ch)
 {
     return ch >= 'A' && ch <= 'Z';
 }
 
-bool al_ascii_is_lowercase(char ch)
+bool ac_ascii_is_lowercase(char ch)
 {
     return ch >= 'a' && ch <= 'z';
 }
 
-char al_ascii_to_uppercase(char ch)
+char ac_ascii_to_uppercase(char ch)
 {
-    if (!al_ascii_is_alphabetic(ch))
+    if (!ac_ascii_is_alphabetic(ch))
         return ch;
 
     // e.g. convert 1000010 (B) to 1100010 (b)
     return ch & ~0x20;
 }
 
-char al_ascii_to_lowercase(char ch)
+char ac_ascii_to_lowercase(char ch)
 {
-    if (!al_ascii_is_alphabetic(ch))
+    if (!ac_ascii_is_alphabetic(ch))
         return ch;
 
     // e.g. convert 1000010 (B) to 1100010 (b)
@@ -1332,11 +1332,11 @@ char al_ascii_to_lowercase(char ch)
  *  LOGGING IMPLEMENTATION  *
  *                          */
 
-Al_LogLevel aclib_log_level = ACLIB_INFO;
+Ac_LogLevel aclib_log_level = ACLIB_INFO;
 FILE* aclib_log_fd = NULL;
-void (*aclib_log_fn_ptr)(Al_LogLevel, const char*, ...) = __aclib_default_log_fn;
+void (*aclib_log_fn_ptr)(Ac_LogLevel, const char*, ...) = __aclib_default_log_fn;
 
-ACLIBDEF void __aclib_default_log_fn(Al_LogLevel loglvl, const char* fmt, ...)
+ACLIBDEF void __aclib_default_log_fn(Ac_LogLevel loglvl, const char* fmt, ...)
 {
     if (loglvl < aclib_log_level)
         return;
@@ -1386,23 +1386,23 @@ ACLIBDEF void __aclib_default_log_fn(Al_LogLevel loglvl, const char* fmt, ...)
  *  VECTOR STRIP PREFIX  *
  *                      */
 
-#define VEC_FOREACH AL_VEC_FOREACH
+#define VEC_FOREACH AC_VEC_FOREACH
 
-#define VecDef Al_VecDef
+#define VecDef Ac_VecDef
 
-#define vec_owned_slice al_vec_owned_slice
-#define vec_slice_range al_vec_slice_range
-#define vec_from al_vec_from
-#define vec_push al_vec_push
-#define vec_unshift al_vec_unshift
-#define vec_append al_vec_append
-#define vec_prepend al_vec_prepend
-#define vec_pop al_vec_pop
-#define vec_shift al_vec_shift
-#define vec_clone_items al_vec_clone_items
-#define vec_empty al_vec_empty
-#define vec_free al_vec_free
-#define vec_ensure_cap al_vec_ensure_cap
+#define vec_owned_slice ac_vec_owned_slice
+#define vec_slice_range ac_vec_slice_range
+#define vec_from ac_vec_from
+#define vec_push ac_vec_push
+#define vec_unshift ac_vec_unshift
+#define vec_append ac_vec_append
+#define vec_prepend ac_vec_prepend
+#define vec_pop ac_vec_pop
+#define vec_shift ac_vec_shift
+#define vec_clone_items ac_vec_clone_items
+#define vec_empty ac_vec_empty
+#define vec_free ac_vec_free
+#define vec_ensure_cap ac_vec_ensure_cap
 
 /* END OF VECTOR STRIP PREFIX */
 
@@ -1412,10 +1412,10 @@ ACLIBDEF void __aclib_default_log_fn(Al_LogLevel loglvl, const char* fmt, ...)
  *  SLICE STRIP PREFIX  *
  *                      */
 
-#define SliceDef Al_SliceDef
+#define SliceDef Ac_SliceDef
 
-#define slice_from al_slice_from
-#define slice_free al_slice_free
+#define slice_from ac_slice_from
+#define slice_free ac_slice_free
 
 /* END OF SLICE STRIP PREFIX */
 
@@ -1425,47 +1425,47 @@ ACLIBDEF void __aclib_default_log_fn(Al_LogLevel loglvl, const char* fmt, ...)
  *  STRING STRIP PREFIX  *
  *                       */
 
-#define STR_FMT AL_STR_FMT
-#define STR_ARG AL_STR_ARG
+#define STR_FMT AC_STR_FMT
+#define STR_ARG AC_STR_ARG
 
-#define String Al_String
-#define StrSlice Al_StrSlice
-#define StrVec Al_StrVec
+#define String Ac_String
+#define StrSlice Ac_StrSlice
+#define StrVec Ac_StrVec
 
-#define str_slice_with_len al_str_slice_with_len
-#define str_slice_from al_str_slice_from
-#define str_owned_slice al_str_owned_slice
-#define str_slice_clone al_str_slice_clone
-#define str_slice_range al_str_slice_range
-#define str_slice_free al_str_slice_free
+#define str_slice_with_len ac_str_slice_with_len
+#define str_slice_from ac_str_slice_from
+#define str_owned_slice ac_str_owned_slice
+#define str_slice_clone ac_str_slice_clone
+#define str_slice_range ac_str_slice_range
+#define str_slice_free ac_str_slice_free
 
-#define str_with_capacity al_str_with_capacity
-#define str_from al_str_from
-#define str_push al_str_push
-#define str_unshift al_str_unshift
-#define str_append al_str_append
-#define str_appendf al_str_appendf
-#define str_prepend al_str_prepend
-#define str_prependf al_str_prependf
-#define str_pop al_str_pop
-#define str_shift al_str_shift
-#define str_clone_chars al_str_clone_chars
-#define str_drain al_str_drain
-#define str_drain_range al_str_drain_range
-#define str_remove al_str_remove
-#define str_remove_range al_str_remove_range
-#define str_empty al_str_empty
-#define str_free al_str_free
-#define str_ensure_cap al_str_ensure_cap
-#define str_trim_front al_str_trim_front
-#define str_trim_back al_str_trim_back
-#define str_trim al_str_trim
-#define str_split_by al_str_split_by
-#define str_split_by_once al_str_split_by_once
-#define str_split_by_many al_str_split_by_many
-#define str_split_at al_str_split_at
-#define str_read_file al_str_read_file
-#define str_read_lines al_str_read_lines
+#define str_with_capacity ac_str_with_capacity
+#define str_from ac_str_from
+#define str_push ac_str_push
+#define str_unshift ac_str_unshift
+#define str_append ac_str_append
+#define str_appendf ac_str_appendf
+#define str_prepend ac_str_prepend
+#define str_prependf ac_str_prependf
+#define str_pop ac_str_pop
+#define str_shift ac_str_shift
+#define str_clone_chars ac_str_clone_chars
+#define str_drain ac_str_drain
+#define str_drain_range ac_str_drain_range
+#define str_remove ac_str_remove
+#define str_remove_range ac_str_remove_range
+#define str_empty ac_str_empty
+#define str_free ac_str_free
+#define str_ensure_cap ac_str_ensure_cap
+#define str_trim_front ac_str_trim_front
+#define str_trim_back ac_str_trim_back
+#define str_trim ac_str_trim
+#define str_split_by ac_str_split_by
+#define str_split_by_once ac_str_split_by_once
+#define str_split_by_many ac_str_split_by_many
+#define str_split_at ac_str_split_at
+#define str_read_file ac_str_read_file
+#define str_read_lines ac_str_read_lines
 
 /* END OF STRING STRIP PREFIX */
 
@@ -1475,14 +1475,14 @@ ACLIBDEF void __aclib_default_log_fn(Al_LogLevel loglvl, const char* fmt, ...)
  *  ASCII STRIP PREFIX  *
  *                      */
 
-#define ascii_is_alphabetic al_ascii_is_alphabetic
-#define ascii_is_numeric al_ascii_is_numeric
-#define ascii_is_alphanumeric al_ascii_is_alphanumeric
-#define ascii_is_whitespace al_ascii_is_whitespace
-#define ascii_is_uppercase al_ascii_is_uppercase
-#define ascii_is_lowercase al_ascii_is_lowercase
-#define ascii_to_uppercase al_ascii_to_uppercase
-#define ascii_to_lowercase al_ascii_to_lowercase
+#define ascii_is_alphabetic ac_ascii_is_alphabetic
+#define ascii_is_numeric ac_ascii_is_numeric
+#define ascii_is_alphanumeric ac_ascii_is_alphanumeric
+#define ascii_is_whitespace ac_ascii_is_whitespace
+#define ascii_is_uppercase ac_ascii_is_uppercase
+#define ascii_is_lowercase ac_ascii_is_lowercase
+#define ascii_to_uppercase ac_ascii_to_uppercase
+#define ascii_to_lowercase ac_ascii_to_lowercase
 
 /* END OF ASCII STRIP PREFIX */
 
@@ -1492,9 +1492,9 @@ ACLIBDEF void __aclib_default_log_fn(Al_LogLevel loglvl, const char* fmt, ...)
  *  LOGGING STRIP PREFIX  *
  *                        */
 
-#define LogLevel Al_LogLevel
-#define log al_log
-#define todo al_todo
+#define LogLevel Ac_LogLevel
+#define log ac_log
+#define todo ac_todo
 
 /* END OF LOGGING STRIP PREFIX */
 
@@ -1504,17 +1504,17 @@ ACLIBDEF void __aclib_default_log_fn(Al_LogLevel loglvl, const char* fmt, ...)
  *  RESULT STRIP PREFIX  *
  *                       */
 
-#define ResTag Al_ResTag
-#define ResDef Al_ResDef
-#define res_ok al_res_ok
-#define res_err al_res_err
-#define res_try al_res_try
-#define res_unwrap al_res_unwrap
-#define res_unwrap_err al_res_unwrap_err
-#define res_unwrap_or al_res_unwrap_or
-#define res_unwrap_or_else al_res_unwrap_or_else
-#define res_map al_res_map
-#define res_map_err al_res_map_err
+#define ResTag Ac_ResTag
+#define ResDef Ac_ResDef
+#define res_ok ac_res_ok
+#define res_err ac_res_err
+#define res_try ac_res_try
+#define res_unwrap ac_res_unwrap
+#define res_unwrap_err ac_res_unwrap_err
+#define res_unwrap_or ac_res_unwrap_or
+#define res_unwrap_or_else ac_res_unwrap_or_else
+#define res_map ac_res_map
+#define res_map_err ac_res_map_err
 
 /* END OF RESULT STRIP PREFIX */
 

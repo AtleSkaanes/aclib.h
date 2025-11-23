@@ -3,8 +3,8 @@
 #include "../aclib.h"
 #include "test.h"
 
-typedef Al_VecDef(int) IntVec;
-typedef Al_SliceDef(int) IntSlc;
+typedef Ac_VecDef(int) IntVec;
+typedef Ac_SliceDef(int) IntSlc;
 
 int main(void)
 {
@@ -12,13 +12,13 @@ int main(void)
 
     TEST(simple_slice_range, {
         int arr[5] = ((int[]){1, 2, 3, 4, 5});
-        IntVec ivec = al_vec_from(arr, 5);
-        IntSlc slc = al_vec_slice_range(IntSlc, ivec, 2, 4);
+        IntVec ivec = ac_vec_from(arr, 5);
+        IntSlc slc = ac_vec_slice_range(IntSlc, ivec, 2, 4);
 
         ASSERT_EQ((size_t)2, slc.len, "%zu");
         ASSERT_ARR_EQ(((int[]){3, 4}), slc.items, 2, "%d");
 
-        al_vec_free(ivec);
+        ac_vec_free(ivec);
     });
 
     TEST_END;
