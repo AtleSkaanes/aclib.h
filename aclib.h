@@ -22,9 +22,9 @@
 // - String
 // - Log
 // - Result
+// - Option
 //
 // LIST OF PLANNED FEATURES
-// - Option
 // - Arena
 // - Cmd runner
 
@@ -708,7 +708,7 @@ ACLIBDEF void __aclib_default_log_fn(Ac_LogLevel loglvl, const char* fmt, ...);
 // USAGE:
 
 /// The tag behind the Ac_Result
-typedef enum
+typedef enum Ac_ResTag
 {
     AC_RES_OK,
     AC_RES_ERR,
@@ -764,6 +764,72 @@ typedef enum
 /// Run a function on an results err value, or give the ok valie
 #define ac_res_map_err(T, res, fn) \
     ((res).tag == AC_RES_ERR ? (T)ac_res_err((fn)((res).err)) : (T)ac_res_ok((res).ok))
+
+
+/* END OF RESULT DECL */
+
+
+
+/*          *
+ *  RESULT  *
+ *          */
+// CONFIG DEFINES:
+//  -
+//
+// CONST DEFINES
+//  -
+//
+// TYPES AND TYPE MACROS:
+//  - Ac_OptTag
+//  - Ac_OptDef(T)
+//
+// FUNCTIONS AND MACROS:
+//  - ac_opt_some(val)
+//  - ac_opt_unwrap(opt)
+//  - ac_opt_unwrap_or(opt, or)
+//  - ac_opt_unwrap_or_else(opt, or_fn)
+//  - ac_opt_map(T, opt, fn)
+//
+// USAGE:
+
+/// The tag behind the Ac_Option
+typedef enum Ac_OptTag
+{
+    AC_OPT_SOME,
+    AC_OPT_NONE,
+} Ac_OptTag;
+
+/// Define a new Option type with an inner type of T
+#define Ac_OptDef(T)   \
+    struct             \
+    {                  \
+        Ac_OptTag tag; \
+        T some;        \
+    }
+
+/// Construct a new opt with a some value
+#define ac_opt_some(val) {.tag = AC_OPT_SOME, .some = (val)}
+
+/// Construct a none opt value
+#define ac_opt_none() {.tag = AC_OPT_NONE}
+
+/// Unrwap an options some value. Asserts that the tag is AC_OPT_SOME
+#define ac_opt_unwrap(opt)                                               \
+    (ACLIB_ASSERT_FN((opt).tag == AC_OPT_SOME &&                         \
+                     "Tried to unwrap option, but got tag AC_OPT_NONE"), \
+     (opt).some)
+
+
+/// Unwrap an option some value, or give the given or value
+#define ac_opt_unwrap_or(opt, or) ((opt).tag == AC_OPT_SOME ? (opt).some : (or))
+
+/// Unwrap an option some value, or give a value, returned from the or_fn function
+#define ac_opt_unwrap_or_else(res, or_fn) ((opt).tag == AC_OPT_SOME ? (opt).tag : (or_fn)())
+
+/// Run a function on an optipns some value, or give a none value
+#define ac_opt_map(T, opt, fn) \
+    ((opt).tag == AC_OPT_SOME ? (T)ac_opt_some((fn)((opt).some)) : (T)ac_opt_none())
+
 
 
 /* END OF RESULT DECL */
@@ -1515,6 +1581,22 @@ ACLIBDEF void __aclib_default_log_fn(Ac_LogLevel loglvl, const char* fmt, ...)
 #define res_unwrap_or_else ac_res_unwrap_or_else
 #define res_map ac_res_map
 #define res_map_err ac_res_map_err
+
+/* END OF RESULT STRIP PREFIX */
+
+
+
+/*                       *
+ *  OPTION STRIP PREFIX  *
+ *                       */
+
+#define OptTag Ac_OptTag
+#define OptDef Ac_OptDef
+#define opt_some ac_opt_some
+#define opt_unwrap ac_opt_unwrap
+#define opt_unwrap_or ac_opt_unwrap_or
+#define opt_unwrap_or_else ac_opt_unwrap_or_else
+#define opt_map ac_opt_map
 
 /* END OF RESULT STRIP PREFIX */
 
