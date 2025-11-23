@@ -45,8 +45,8 @@ int main(void)
         ASSERT_EQ(5, res.ok, "%d");
 
         IntRes res_err = (IntRes)ac_res_err(ERROR_EXAMPLE);
-        ASSERT_EQ(AC_RES_ERR, res.tag, "{tag: %d}");
-        ASSERT_EQ(ERROR_EXAMPLE, res.err, "%d");
+        ASSERT_EQ(AC_RES_ERR, res_err.tag, "{tag: %d}");
+        ASSERT_EQ(ERROR_EXAMPLE, res_err.err, "%d");
     });
 
     TEST(simple_ok_unwrap, {
