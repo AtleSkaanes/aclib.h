@@ -571,6 +571,10 @@ void* __aclib_clone_arr(void* ptr, size_t size);
 //  - ac_str_read_file(*buffer, *file)
 //  - ac_str_read_lines(*linebuffer, *file)
 //
+//  - ac_str_trimmed_front(slice)
+//  - ac_str_trimmed_back(slice)
+//  - ac_str_trimmed(slice)
+//
 // USAGE:
 //  # DEFINING
 //  Define a slice type with the `VecDef(T)` macro, e.g:
@@ -761,8 +765,20 @@ ACLIBDEF Ac_StrVec ac_str_split_at(Ac_String str, size_t idx);
 /// Reads a file into a string buffer, and returns the amount of bytes read.
 ACLIBDEF size_t ac_str_read_file(Ac_String* buffer, FILE* file);
 
-// Reads all the lines in a file into a line buffer, and returns the amount of bytes read.
+/// Reads all the lines in a file into a line buffer, and returns the amount of bytes read.
 ACLIBDEF size_t ac_str_read_lines(Ac_StrVec* linebuffer, FILE* file);
+
+/// Trim the front of a string slice, without allocating or copying any bytes. The returned slice is
+/// just a pointer to the original slice.
+ACLIBDEF Ac_StrSlice ac_str_trimmed_front(Ac_StrSlice slice);
+
+/// Trim the back of a string slice, without allocating or copying any bytes. The returned slice is
+/// just a pointer to the original slice.
+ACLIBDEF Ac_StrSlice ac_str_trimmed_back(Ac_StrSlice slice);
+
+/// Trim a string slice, without allocating or copying any bytes. The returned slice is just a
+/// pointer to the original slice.
+ACLIBDEF Ac_StrSlice ac_str_trimmed(Ac_StrSlice slice);
 
 /* END OF STRING DECL */
 
@@ -1257,7 +1273,6 @@ ACLIBDEF void ac_str_trim_front(Ac_String* str)
     ac_str_remove_range(str, 0, end);
 }
 
-/// Trim all whitespace from the back of the string
 ACLIBDEF void ac_str_trim_back(Ac_String* str)
 {
     if (str->len == 0)
@@ -1270,14 +1285,42 @@ ACLIBDEF void ac_str_trim_back(Ac_String* str)
     ac_str_remove_range(str, start, str->len);
 }
 
-/// Trim all whitespace from the front and back of a string
 ACLIBDEF void ac_str_trim(Ac_String* str)
 {
     ac_str_trim_back(str);
     ac_str_trim_front(str);
 }
 
-/// Split a string by a delimeter
+ACLIBDEF Ac_StrSlice ac_str_trimmed_front(Ac_StrSlice slice)
+{
+    if (slice.len == 0)
+        return (Ac_StrSlice){0};
+
+    size_t end = 0;
+    while (end < slice.len && ac_ascii_is_whitespace(slice.chars[end]))
+        end++;
+
+    return (Ac_StrSlice){.chars = slice.chars + end, .len = slice.len - end};
+}
+
+ACLIBDEF Ac_StrSlice ac_str_trimmed_back(Ac_StrSlice slice)
+{
+    if (slice.len == 0)
+        return (Ac_StrSlice){0};
+
+    size_t start = slice.len;
+    while (start > 0 && ac_ascii_is_whitespace(slice.chars[start - 1]))
+        start--;
+
+    return (Ac_StrSlice){.chars = slice.chars, .len = start};
+}
+
+ACLIBDEF Ac_StrSlice ac_str_trimmed(Ac_StrSlice slice)
+{
+    Ac_StrSlice trimmed_front = ac_str_trimmed_front(slice);
+    return ac_str_trimmed_back(trimmed_front);
+}
+
 ACLIBDEF Ac_StrVec ac_str_split_by(Ac_String str, char delim)
 {
     size_t start = 0;
@@ -1633,6 +1676,10 @@ ACLIBDEF void __aclib_default_log_fn(Ac_LogLevel loglvl, const char* fmt, ...)
 #define str_split_at ac_str_split_at
 #define str_read_file ac_str_read_file
 #define str_read_lines ac_str_read_lines
+
+#define str_trimmed_front ac_str_trimmed_front
+#define str_trimmed_back ac_str_trimmed_back
+#define str_trimmed ac_str_trimmed
 
 /* END OF STRING STRIP PREFIX */
 

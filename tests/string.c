@@ -391,6 +391,42 @@ int main(void)
         ac_str_free(&str);
     });
 
+    TEST(simple_trimmed_front, {
+        Ac_StrSlice slc = ac_str_slice_from("   foo bar  ");
+        Ac_StrSlice trimmed = ac_str_trimmed_front(slc);
+
+        ASSERT_STR_LEN_EQ("foo bar  ", trimmed.chars, trimmed.len);
+        ASSERT_EQ((size_t)9, trimmed.len, "%zu");
+        ASSERT_EQ(slc.chars + 3, trimmed.chars, "%p");
+    });
+
+    TEST(simple_trimmed_back, {
+        Ac_StrSlice slc = ac_str_slice_from("   foo bar  ");
+        Ac_StrSlice trimmed = ac_str_trimmed_back(slc);
+
+        ASSERT_EQ((size_t)10, trimmed.len, "%zu");
+        ASSERT_STR_LEN_EQ("   foo bar", trimmed.chars, trimmed.len);
+        ASSERT_EQ(slc.chars, trimmed.chars, "%p");
+    });
+
+    TEST(simple_trimmed, {
+        Ac_StrSlice slc = ac_str_slice_from("   foo bar  ");
+        Ac_StrSlice trimmed = ac_str_trimmed(slc);
+
+        ASSERT_STR_LEN_EQ("foo bar", trimmed.chars, trimmed.len);
+        ASSERT_EQ((size_t)7, trimmed.len, "%zu");
+        ASSERT_EQ(slc.chars + 3, trimmed.chars, "%p");
+    });
+
+    TEST(trimmed_no_whitespace, {
+        Ac_StrSlice slc = ac_str_slice_from("foo bar");
+        Ac_StrSlice trimmed = ac_str_trimmed(slc);
+
+        ASSERT_STR_LEN_EQ("foo bar", trimmed.chars, trimmed.len);
+        ASSERT_EQ((size_t)7, trimmed.len, "%zu");
+        ASSERT_EQ(slc.chars, trimmed.chars, "%p");
+    });
+
     TEST(simple_split_by, {
         Ac_String str = ac_str_from("foo bar baz");
         char* old_ptr = str.chars;
