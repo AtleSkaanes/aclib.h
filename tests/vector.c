@@ -20,6 +20,17 @@ int main(void)
         ac_vec_free(ivec);
     });
 
+    TEST(slice_member_eql, {
+        int arr[5] = ((int[]){1, 2, 3, 4, 5});
+        IntVec ivec = ac_vec_from(arr, 5);
+
+        ASSERT_ARR_EQ(ivec.items, ivec.slice.items, ivec.len, "%d");
+        ASSERT_EQ(ivec.len, ivec.slice.len, "%zu");
+        ASSERT_EQ(ivec.items, ivec.slice.items, "%p");
+
+        ac_vec_free(ivec);
+    });
+
     TEST(create_push_and_free, {
         IntVec ivec = {0};
         ASSERT_EQ((size_t)0, ivec.len, "%zu");

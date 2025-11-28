@@ -1,7 +1,12 @@
 #ifndef __ACLIB_H
 #define __ACLIB_H
 
+#include <errno.h>
 #include <stdio.h>
+#include <sys/types.h>
+#define __USE_GNU // Include execvpe
+#include <sys/wait.h>
+#include <unistd.h>
 
 // LIST OF DEFINES
 // - ACLIB_IMPLEMENTATION
@@ -52,6 +57,7 @@
 #define ACLIB_REALLOC_FN realloc
 #endif
 
+#define _Nullable
 
 #include <stdarg.h>
 #include <stdbool.h>
@@ -298,12 +304,19 @@ typedef Ac_OptDef(char) Ac_CharOpt;
 #endif
 
 /// Define a Vector struct with the given inner type T
-#define Ac_VecDef(T) \
-    struct           \
-    {                \
-        T* items;    \
-        size_t len;  \
-        size_t cap;  \
+#define Ac_VecDef(T)              \
+    struct                        \
+    {                             \
+        union                     \
+        {                         \
+            Ac_SliceDef(T) slice; \
+            struct                \
+            {                     \
+                T* items;         \
+                size_t len;       \
+            };                    \
+        };                        \
+        size_t cap;               \
     }
 
 /// Iterate over a vector or slice
@@ -516,8 +529,8 @@ void* __aclib_clone_arr(void* ptr, size_t size);
 //  - AC_STR_ARG
 //
 // TYPES AND TYPE MACROS:
-//  - Ac_String
 //  - Ac_StrSlice
+//  - Ac_String
 //  - Ac_StrVec
 //
 // FUNCTIONS AND MACROS:
@@ -588,18 +601,6 @@ void* __aclib_clone_arr(void* ptr, size_t size);
 //  ac_vec_free(al);
 //  ```
 
-/// A dynamic and owned string
-typedef struct Ac_String
-{
-    /// The characters of the string. Can be used as a cstr
-    char* chars;
-    /// The length of the string
-    size_t len;
-    /// The capacity of the string
-    size_t cap;
-} Ac_String;
-
-
 /// A string slice, which holds a cstr and a length
 typedef struct Ac_StrSlice
 {
@@ -608,6 +609,27 @@ typedef struct Ac_StrSlice
     /// The length of the string slice
     size_t len;
 } Ac_StrSlice;
+
+
+/// A dynamic and owned string
+typedef struct Ac_String
+{
+    union
+    {
+        /// The string of the slice
+        Ac_StrSlice slice;
+        struct
+        {
+            /// The characters of the string. Can be used as a cstr
+            char* chars;
+            /// The length of the string
+            size_t len;
+        };
+    };
+    /// The capacity of the string
+    size_t cap;
+} Ac_String;
+
 
 /// A format string used to print strings and string slices properly. Remember to use `AC_STR_ARG()`
 /// as the format argument.
@@ -851,6 +873,12 @@ ACLIBDEF void __aclib_default_log_fn(Ac_LogLevel loglvl, const char* fmt, ...);
 /// Print a log messae
 #define ac_log (aclib_log_fd = (!aclib_log_fd) ? stderr : aclib_log_fd, *aclib_log_fn_ptr)
 
+#ifndef ACLIB_SILENT
+#define __ac_intern_log(...) ac_log(__VA_ARGS__)
+#else
+#define __ac_intern_log(...)
+#endif
+
 #define ac_todo(msg) (ac_log(ACLIB_ERR, "%s:%d: TODO: %s\n", __FILE__, __LINE__, (msg)), abort())
 
 /* END OF LOGGING DECL */
@@ -958,12 +986,6 @@ ACLIBDEF void ac_str_push(Ac_String* str, char ch)
     str->chars[str->len + 1] = '\0';
     str->len += 1;
 }
-
-// LEN: 9:
-//
-// 'NUMBER: 4'
-// 'NNUMBER: 4'
-// '[NUMBER: 4'
 
 ACLIBDEF void ac_str_unshift(Ac_String* str, char ch)
 {

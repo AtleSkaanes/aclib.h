@@ -41,6 +41,16 @@ int main(void)
         ac_str_free(&str);
     });
 
+    TEST(slice_member_eql, {
+        Ac_String str = ac_str_from("foo");
+
+        ASSERT_ARR_EQ(str.chars, str.slice.chars, str.len, "%d");
+        ASSERT_EQ(str.len, str.slice.len, "%zu");
+        ASSERT_EQ(str.chars, str.slice.chars, "%p");
+
+        ac_str_free(&str);
+    });
+
     TEST(empty_string_push_pop, {
         Ac_String str = {0};
         ASSERT_EQ((size_t)0, str.len, "%zu");
